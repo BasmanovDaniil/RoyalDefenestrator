@@ -15,20 +15,20 @@
 		<script type="text/javascript">
 		<!--
 			var config = {
-				width: 900, 
+				width: 960, 
 				height: 600,
 				params: { enableDebugging:"0" }
 				
 			};
 			var u = new UnityObject2(config);
-			
+
 			jQuery(function() {
 
 				var $missingScreen = jQuery("#unityPlayer").find(".missing");
 				var $brokenScreen = jQuery("#unityPlayer").find(".broken");
 				$missingScreen.hide();
 				$brokenScreen.hide();
-
+				
 				u.observeProgress(function (progress) {
 					switch(progress.pluginStatus) {
 						case "broken":
@@ -64,15 +64,15 @@
 		<!--
 		body {
 			font-family: Helvetica, Verdana, Arial, sans-serif;
-			background-color: black;
-			color: white;
+			background-color: white;
+			color: black;
 			text-align: center;
 		}
 		a:link, a:visited {
-			color: #bfbfbf;
+			color: #000;
 		}
 		a:active, a:hover {
-			color: #bfbfbf;
+			color: #666;
 		}
 		p.header {
 			font-size: small;
@@ -85,7 +85,7 @@
 		}
 		div.content {
 			margin: auto;
-			width: 1024px;
+			width: 960px;
 		}
 		div.broken,
 		div.missing {
@@ -110,7 +110,7 @@
 		div#unityPlayer {
 			cursor: default;
 			height: 600px;
-			width: 720px;
+			width: 960px;
 		}
 		-->
 		</style>
@@ -122,6 +122,11 @@
 				<div class="missing">
 					<a href="http://unity3d.com/webplayer/" title="Unity Web Player. Install now!">
 						<img alt="Unity Web Player. Install now!" src="http://webplayer.unity3d.com/installation/getunity.png" width="193" height="63" />
+					</a>
+				</div>
+				<div class="broken">
+					<a href="http://unity3d.com/webplayer/" title="Unity Web Player. Install now! Restart your browser after install.">
+						<img alt="Unity Web Player. Install now! Restart your browser after install." src="http://webplayer.unity3d.com/installation/getunityrestart.png" width="193" height="63" />
 					</a>
 				</div>
 			</div>
