@@ -1,16 +1,27 @@
 RoyalDefenestrator
 ==================
 
-Looks like our queen is in a bad mood. You better hurry throw that table out of that window...
+Looks like our queen is in a bad mood. You better hurry throw that table out of that window... 
 
-WASD, Arrow keys or Left stick on gamepad: Move
+MOVE: Arrow keys, WASD or Left stick on gamepad 
 
-Space or A on gamepad: Pick up/Throw
+PICK UP/THROW: Space or A on gamepad. Just get close enough to that thing to pick it up and throw 
 
-Esc: Menu
+MENU: Esc 
 
-Just get close enough to that thing to pick it up and throw
 
-To linux users:
+To linux users: 
+chmod +x RoyalDefenestrator.x86 
 
-chmod +x RoyalDefenestrator.x86
+
+Fonts:
+==================
+http://www.google.com/fonts/specimen/Milonga 
+
+http://www.google.com/fonts/specimen/Italianno 
+
+Sounds: 
+==================
+http://www.freesound.org/people/dobroide/sounds/107637/ 
+
+https://musopen.org/music/1568/edvard-grieg/peer-gynt-suite-no-1-op-46/
