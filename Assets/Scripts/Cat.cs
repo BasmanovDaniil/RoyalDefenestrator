@@ -44,7 +44,7 @@ public class Cat : MonoBehaviour
         {
             if (!grabbed)
             {
-                speechBubble.SetText(panicList[random.Next(panicList.Length)]);
+                speechBubble.SetText(purrList[random.Next(panicList.Length)]);
                 yield return new WaitForSeconds(3);
                 speechBubble.SetText("");
             }
