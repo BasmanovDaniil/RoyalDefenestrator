@@ -156,7 +156,7 @@ public class Storyteller : MonoBehaviour
             StartScenario();
             yield break;
         }
-        guardOneSpeechBubble.SetText("Looks like our queen in a bad mood");
+        guardOneSpeechBubble.SetText("Looks like our queen is in a bad mood");
         yield return new WaitForSeconds(4);
         if (guardOne.grabbed)
         {
