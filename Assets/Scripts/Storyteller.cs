@@ -26,13 +26,13 @@ public class Storyteller : MonoBehaviour
     public Transform goodAltCat;
     [HideInInspector]
     public bool firstVictimDead;
+    public bool catKilled = false;
 
     private bool inMenu;
     private RaycastHit rayHit;
     private TextMesh hit;
     private bool firstTime = true;
     private bool end = false;
-    private bool catKilled = false;
 
     void Awake()
     {
@@ -156,7 +156,7 @@ public class Storyteller : MonoBehaviour
             StartScenario();
             yield break;
         }
-        guardOneSpeechBubble.SetText("Looks like our queen in a bad mood");
+        guardOneSpeechBubble.SetText("Looks like our queen is in a bad mood");
         yield return new WaitForSeconds(4);
         if (guardOne.grabbed)
         {

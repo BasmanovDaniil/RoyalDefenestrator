@@ -42,6 +42,7 @@ public class Vortex : MonoBehaviour
             if (other.name == "Cat")
             {
                 queen.catKilled = true;
+                storyteller.catKilled = true;
             }
         }
         if (other.tag == "Queen")
@@ -49,9 +50,10 @@ public class Vortex : MonoBehaviour
             StartCoroutine(storyteller.GoodEndingAlt());
         }
 
-        if (other.tag == "Cat")
+        if (other.tag == "Cat" || other.name == "Cat")
         {
             queen.catKilled = true;
+            storyteller.catKilled = true;
         }
         if (other.tag == "Guard")
         {
