@@ -36,9 +36,11 @@ public class Cat : MonoBehaviour
         yield return new WaitForSeconds(1);
         while (!grounded)
         {
+            random = new System.Random((int)tr.position.x);
             speechBubble.SetText(panicList[random.Next(panicList.Length)]);
             yield return new WaitForSeconds(3);
             speechBubble.SetText("");
+            yield return new WaitForSeconds(3);
         }
     }
 
@@ -48,7 +50,8 @@ public class Cat : MonoBehaviour
         {
             if (grounded)
             {
-                speechBubble.SetText(panicList[random.Next(purrList.Length)]);
+                random = new System.Random((int)tr.position.x);
+                speechBubble.SetText(purrList[random.Next(purrList.Length)]);
                 yield return new WaitForSeconds(3);
                 speechBubble.SetText("");
             }

@@ -3,7 +3,6 @@ using UnityEngine;
 public class SpeechBubble : MonoBehaviour
 {
     public Transform target;
-    public Camera cam;
     public Transform camTransform;
     public TextMesh back;
     public TextMesh front;

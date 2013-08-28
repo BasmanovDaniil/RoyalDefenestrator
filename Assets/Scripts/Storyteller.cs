@@ -109,6 +109,7 @@ public class Storyteller : MonoBehaviour
         {
             guard.walking = false;
         }
+        Invoke("OpenMenu", 2);
     }
 
     public IEnumerator GoodEndingAlt()
@@ -131,6 +132,7 @@ public class Storyteller : MonoBehaviour
         {
             guard.walking = false;
         }
+        Invoke("OpenMenu", 2);
     }
 
     public void BadEnding()
@@ -145,6 +147,7 @@ public class Storyteller : MonoBehaviour
         {
             guard.walking = false;
         }
+        Invoke("OpenMenu", 2);
     }
 
     IEnumerator StartTutorial()
