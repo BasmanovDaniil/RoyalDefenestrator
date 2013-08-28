@@ -11,9 +11,6 @@ PICK UP/THROW: Space or A on gamepad. Just get close enough to that thing to pic
 MENU: Esc
 
 
-Just get close enough to that thing to pick it up and throw
-
-
 To linux users:
 
 chmod +x RoyalDefenestrator.x86
