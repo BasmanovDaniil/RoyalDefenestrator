@@ -395,6 +395,11 @@ public class Queen : MonoBehaviour
         else
         {
             walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
             speechBubble.SetText("");
             yield break;
         }
@@ -406,6 +411,11 @@ public class Queen : MonoBehaviour
         else
         {
             walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
             speechBubble.SetText("");
             yield break;
         }
@@ -417,6 +427,11 @@ public class Queen : MonoBehaviour
         else
         {
             walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
             speechBubble.SetText("");
             yield break;
         }
@@ -428,6 +443,11 @@ public class Queen : MonoBehaviour
         else
         {
             walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
             speechBubble.SetText("");
             yield break;
         }
@@ -439,6 +459,11 @@ public class Queen : MonoBehaviour
         else
         {
             walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
             speechBubble.SetText("");
             yield break;
         }
@@ -450,6 +475,11 @@ public class Queen : MonoBehaviour
         else
         {
             walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
             speechBubble.SetText("");
             yield break;
         }
@@ -461,6 +491,11 @@ public class Queen : MonoBehaviour
         else
         {
             walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
             speechBubble.SetText("");
             yield break;
         }
@@ -472,6 +507,11 @@ public class Queen : MonoBehaviour
         else
         {
             walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
             speechBubble.SetText("");
             yield break;
         }
@@ -491,6 +531,11 @@ public class Queen : MonoBehaviour
         else
         {
             walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
             speechBubble.SetText("");
             yield break;
         }
@@ -506,6 +551,11 @@ public class Queen : MonoBehaviour
             yield return new WaitForSeconds(1);
         }
         walking = true;
+        target = null;
+        if (indicator != null)
+        {
+            Destroy(indicator.gameObject);
+        }
         speechBubble.SetText("");
     }
 
