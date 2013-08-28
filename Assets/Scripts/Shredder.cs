@@ -8,7 +8,7 @@ public class Shredder : MonoBehaviour
 
     IEnumerator DestroyOther(GameObject other)
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1.5f);
         Destroy(other);
     }
 
@@ -30,6 +30,10 @@ public class Shredder : MonoBehaviour
                 queen.catKilled = true;
                 storyteller.catKilled = true;
             }
+            if (other.name == "Guard")
+            {
+                storyteller.guardCount--;
+            }
         }
         if (other.tag == "Queen")
         {
@@ -41,7 +45,7 @@ public class Shredder : MonoBehaviour
             queen.catKilled = true;
             storyteller.catKilled = true;
         }
-        if (other.tag == "Guard")
+        if (other.tag == "Guard" || other.name == "Guard")
         {
             storyteller.guardCount--;
         }

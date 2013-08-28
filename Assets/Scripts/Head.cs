@@ -3,17 +3,11 @@ using UnityEngine;
 public class Head : MonoBehaviour
 {
     public Transform host;
-    public Transform body;
     public Transform head;
     public Transform target;
     public bool grabbed;
 
     private Vector3 toTarget;
-
-	void Start ()
-    {
-	
-	}
 
 	void FixedUpdate ()
 	{
@@ -27,7 +21,7 @@ public class Head : MonoBehaviour
                 toTarget.y = 1;
 	            head.forward = Vector3.Slerp(head.forward, toTarget, 10*Time.deltaTime);
 	        }
-            if (Vector3.Angle(body.forward, target.position - head.position) > 60)
+            if (Vector3.Angle(host.forward, target.position - head.position) > 60)
             {
                 toTarget.y = 0;
                 host.forward = Vector3.Slerp(host.forward, toTarget, 3 * Time.deltaTime);
@@ -35,9 +29,9 @@ public class Head : MonoBehaviour
 	    }
 	    else
 	    {
-            if (Vector3.Angle(head.forward, body.forward) > 3)
+            if (Vector3.Angle(head.forward, host.forward) > 3)
             {
-                head.forward = Vector3.Slerp(head.forward, body.forward, 10 * Time.deltaTime);
+                head.forward = Vector3.Slerp(head.forward, host.forward, 10 * Time.deltaTime);
             }
 	    }
 	}

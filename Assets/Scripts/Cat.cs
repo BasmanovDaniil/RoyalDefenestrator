@@ -5,9 +5,11 @@ public class Cat : MonoBehaviour
 {
     public int radius = 7;
     public LayerMask characterLayer;
-    public bool grabbed;
-    public Head head;
+    public bool grounded;
+    
     public SpeechBubble speechBubble;
+    public Transform target;
+    public Transform head;
 
     private Transform tr;
     private Rigidbody rb;
@@ -15,6 +17,8 @@ public class Cat : MonoBehaviour
     private System.Random random;
     private string[] panicList;
     private string[] purrList;
+    private Vector3 newForward;
+    private Vector3 toTarget;
 
     void Start ()
 	{
@@ -30,7 +34,7 @@ public class Cat : MonoBehaviour
     public IEnumerator Panic()
     {
         yield return new WaitForSeconds(1);
-        while (grabbed)
+        while (!grounded)
         {
             speechBubble.SetText(panicList[random.Next(panicList.Length)]);
             yield return new WaitForSeconds(3);
@@ -42,9 +46,9 @@ public class Cat : MonoBehaviour
     {
         while (true)
         {
-            if (!grabbed)
+            if (grounded)
             {
-                speechBubble.SetText(panicList[random.Next(panicList.Length)]);
+                speechBubble.SetText(panicList[random.Next(purrList.Length)]);
                 yield return new WaitForSeconds(3);
                 speechBubble.SetText("");
             }
@@ -54,20 +58,58 @@ public class Cat : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (head == null) return;
-        if(head.target != null)
-        {
-            if ((head.target.position - tr.position).sqrMagnitude > 100)
-            {
-                head.target = null;
-            }
-        }
+        if (!grounded) return;
+        newForward = tr.forward;
 
         characters = Physics.OverlapSphere(tr.position, radius, characterLayer);
         if(characters.Length > 1)
         {
-            head.target = characters[1].transform;
+            foreach (var character in characters)
+            {
+                if (character.name != "Cat")
+                {
+                    target = character.transform;
+                }
+            }
         }
-        
+
+        if (target != null)
+        {
+            toTarget = target.position - head.position;
+            if (Vector3.Angle(head.forward, toTarget) > 3)
+            {
+                head.forward = Vector3.Slerp(head.forward, toTarget, 10 * Time.deltaTime);
+            }
+            if (Vector3.Angle(tr.forward, toTarget) > 45)
+            {
+                newForward += toTarget.normalized;
+            }
+            if ((target.position - tr.position).sqrMagnitude > 100)
+            {
+                target = null;
+            }
+        }
+        else
+        {
+            if (Vector3.Angle(head.forward, tr.forward) > 3)
+            {
+                head.forward = Vector3.Slerp(head.forward, tr.forward, 10 * Time.deltaTime);
+            }
+        }
+
+        newForward.y = 0;
+        if (newForward != tr.forward || tr.up != Vector3.up)
+        {
+            tr.rotation = Quaternion.Slerp(tr.rotation, Quaternion.LookRotation(newForward, Vector3.up), 5 * Time.deltaTime);
+        }
+    }
+
+    void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.tag == "Floor")
+        {
+            grounded = true;
+            rb.drag = 5;
+        }
     }
 }

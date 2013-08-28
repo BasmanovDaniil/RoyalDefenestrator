@@ -13,7 +13,6 @@ public class Menu : MonoBehaviour
 
     void OnMouseDown()
     {
-        Debug.Log("byr");
         if (text.text == "Resume")
         {
             storyteller.Resume();

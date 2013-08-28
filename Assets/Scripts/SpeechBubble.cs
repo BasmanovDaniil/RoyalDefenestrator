@@ -19,8 +19,7 @@ public class SpeechBubble : MonoBehaviour
 	
 	void Update ()
 	{
-	    if (target == null) return;
-        if(camTransform == null) return;
+	    if (target == null || camTransform == null) return;
 	    if (front.text == "") return;
         tr.position = target.position + Vector3.up*4;
         tr.rotation = Quaternion.LookRotation(tr.position - camTransform.position, Vector3.up);
@@ -28,6 +27,9 @@ public class SpeechBubble : MonoBehaviour
 
     public void SetText(string text)
     {
+        if (target == null || camTransform == null) return;
+        tr.position = target.position + Vector3.up * 4;
+        tr.rotation = Quaternion.LookRotation(tr.position - camTransform.position, Vector3.up);
         back.text = text;
         front.text = text;
     }

@@ -10,18 +10,18 @@ public class Queen : MonoBehaviour
     public float targetDistance = 0.5f;
     public int moveSpeed = 300;
     public int turnSpeed = 150;
-    public Transform page;
+    public Page page;
     public Guard guardOne;
     public Guard guardTwo;
     public Guard[] guardList;
     public SpeechBubble speechBubble;
     public GameObject indicatorPrefab;
     public bool walking = true;
-    public bool grabbed;
+    public bool grounded = true;
     public bool catKilled;
     public Storyteller storyteller;
-    [HideInInspector]
-    public Head head;
+    public Transform target;
+    public Transform head;
 
     private Transform tr;
     private Rigidbody rb;
@@ -39,6 +39,8 @@ public class Queen : MonoBehaviour
     private System.Random random;
     private Transform admire;
     private bool admireKilled;
+    private Vector3 newForward;
+    private Vector3 toTarget;
 
 	void Start ()
     {
@@ -48,7 +50,6 @@ public class Queen : MonoBehaviour
         tr = transform;
 	    rb = rigidbody;
         seeker = GetComponent<Seeker>();
-	    head = GetComponent<Head>();
 
         seeker.pathCallback += OnPathComplete;
 
@@ -61,36 +62,65 @@ public class Queen : MonoBehaviour
 
 	void FixedUpdate ()
 	{
-        if (grabbed) return;
-	    if (!walking) return;
-	    if (path == null) return;
-	    if ((path.vectorPath[path.vectorPath.Count - 1] - tr.position).sqrMagnitude > targetDistance*targetDistance)
+        if (!grounded) return;
+        newForward = tr.forward;
+
+	    if (walking)
 	    {
-	        direction = path.vectorPath[currentWaypoint] - tr.position;
-	        direction.y = 0;
-	        direction = direction.normalized;
-
-            if (Vector3.Angle(tr.forward, direction) > 5 && direction != Vector3.zero)
+            if (path == null) return;
+            if ((path.vectorPath[path.vectorPath.Count - 1] - tr.position).sqrMagnitude > targetDistance * targetDistance)
             {
-                tr.rotation = Quaternion.Slerp(tr.rotation, Quaternion.LookRotation(direction, Vector3.up), 10 * Time.deltaTime);
+                direction = path.vectorPath[currentWaypoint] - tr.position;
+                direction.y = 0;
+
+                if (Vector3.Angle(tr.forward, direction) > 5 && direction != Vector3.zero)
+                {
+                    newForward += direction.normalized;
+                }
+                rb.AddForce(direction.normalized * moveSpeed * Time.deltaTime);
+
+                if ((tr.position - path.vectorPath[currentWaypoint]).sqrMagnitude < nextWaypointDistance * nextWaypointDistance && currentWaypoint < path.vectorPath.Count - 1)
+                {
+                    currentWaypoint++;
+                }
             }
-            rb.AddForce(tr.forward * moveSpeed * Time.deltaTime);
-
-            if ((tr.position - path.vectorPath[currentWaypoint]).sqrMagnitude < nextWaypointDistance * nextWaypointDistance && currentWaypoint < path.vectorPath.Count - 1)
+            else
             {
-                currentWaypoint++;
+                path = null;
+                direction = Vector3.zero;
+                if (currentTarget < targetList.Length - 1)
+                {
+                    currentTarget++;
+                    currentWaypoint = 0;
+                    SetTarget(targetList[currentTarget]);
+                }
             }
 	    }
+
+        if (target != null)
+        {
+            toTarget = target.position - head.position;
+            if (Vector3.Angle(head.forward, toTarget) > 3)
+            {
+                head.forward = Vector3.Slerp(head.forward, toTarget, 10 * Time.deltaTime);
+            }
+            if (Vector3.Angle(tr.forward, toTarget) > 45)
+            {
+                newForward += toTarget.normalized;
+            }
+        }
         else
-	    {
-            path = null;
-            direction = Vector3.zero;
-	        if (currentTarget < targetList.Length - 1)
-	        {
-	            currentTarget++;
-	            currentWaypoint = 0;
-	            SetTarget(targetList[currentTarget]);
-	        }
+        {
+            if (Vector3.Angle(head.forward, tr.forward) > 3)
+            {
+                head.forward = Vector3.Slerp(head.forward, tr.forward, 10 * Time.deltaTime);
+            }
+        }
+
+        newForward.y = 0;
+        if (newForward != tr.forward || tr.up != Vector3.up)
+        {
+            tr.rotation = Quaternion.Slerp(tr.rotation, Quaternion.LookRotation(newForward, Vector3.up), 5 * Time.deltaTime);
         }
 	}
 
@@ -124,7 +154,7 @@ public class Queen : MonoBehaviour
 
     public IEnumerator Admire(Transform admireTransform)
     {
-        if (grabbed) yield break;
+        if (!grounded) yield break;
 
         walking = false;
 
@@ -133,9 +163,9 @@ public class Queen : MonoBehaviour
         if (!admireKilled)
         {
             speechBubble.SetText("What is this?");
-            head.target = admire;
-            guardOne.head.target = admire;
-            guardTwo.head.target = admire;
+            target = admire;
+            guardOne.target = admire;
+            guardTwo.target = admire;
             if (indicator == null)
             {
                 var clone = Instantiate(indicatorPrefab, admire.position, Quaternion.identity) as GameObject;
@@ -153,6 +183,7 @@ public class Queen : MonoBehaviour
             StartCoroutine(Panic());
         }
 
+        if (!grounded) yield break;
         if (!admireKilled)
         {
             speechBubble.SetText("");
@@ -167,6 +198,7 @@ public class Queen : MonoBehaviour
             StartCoroutine(Panic());
         }
 
+        if (!grounded) yield break;
         if (!admireKilled)
         {
             speechBubble.SetText("Oh! My beautiful vase!");
@@ -180,6 +212,8 @@ public class Queen : MonoBehaviour
             yield return new WaitForSeconds(2);
             StartCoroutine(Panic());
         }
+
+        if (!grounded) yield break;
         if (!admireKilled)
         {
             speechBubble.SetText("");
@@ -194,13 +228,14 @@ public class Queen : MonoBehaviour
             yield return new WaitForSeconds(2);
             StartCoroutine(Panic());
         }
+        if (!grounded) yield break;
         if (!admireKilled)
         {
             speechBubble.SetText("What a nice vase!");
             walking = true;
-            head.target = null;
-            guardOne.head.target = null;
-            guardTwo.head.target = null;
+            target = null;
+            guardOne.target = null;
+            guardTwo.target = null;
             Destroy(indicator.gameObject);
             yield return new WaitForSeconds(2);
             speechBubble.SetText("");
@@ -217,28 +252,35 @@ public class Queen : MonoBehaviour
 
     public IEnumerator Finish()
     {
-        if (grabbed) yield break;
+        if (!grounded) yield break;
 
         walking = false;
 
-        head.target = page;
-        guardOne.head.target = page;
-        guardTwo.head.target = page;
-
+        target = page.head;
+        guardOne.target = page.head;
+        guardTwo.target = page.head;
+        if (!grounded) yield break;
         speechBubble.SetText("What is this?");
         yield return new WaitForSeconds(3);
+        if (!grounded) yield break;
         speechBubble.SetText("");
         yield return new WaitForSeconds(3);
+        if (!grounded) yield break;
         speechBubble.SetText("Oh! My glasses!");
         yield return new WaitForSeconds(3);
+        if (!grounded) yield break;
         speechBubble.SetText("");
         yield return new WaitForSeconds(3);
+        if (!grounded) yield break;
         speechBubble.SetText("Now THAT is much better");
         yield return new WaitForSeconds(3);
+        if (!grounded) yield break;
         speechBubble.SetText("");
         yield return new WaitForSeconds(3);
+        if (!grounded) yield break;
         speechBubble.SetText("Where is my cat?");
         yield return new WaitForSeconds(3);
+        if (!grounded) yield break;
         if (catKilled)
         {
             StartCoroutine(Panic());
@@ -258,7 +300,7 @@ public class Queen : MonoBehaviour
 
     public void SetVictim(Transform victimTransform)
     {
-        if (grabbed) return;
+        if (!grounded) return;
         if (victimTransform == null) return;
         victim = victimTransform;
         walking = false;
@@ -270,18 +312,18 @@ public class Queen : MonoBehaviour
             indicator = clone.transform;
             indicator.parent = victim;
         }
-        head.target = victim;
-        guardOne.head.target = victim;
-        guardTwo.head.target = victim;
+        target = victim;
+        guardOne.target = victim;
+        guardTwo.target = victim;
         StartCoroutine(Shout());
     }
 
     public void KillVictim(Transform victimTransform)
     {
-        if (victim == victimTransform && !grabbed)
+        if (victim == victimTransform && grounded)
         {
             killed = true;
-            head.target = null;
+            target = null;
             CallGuards();
             StartCoroutine(CalmDown());
         }
@@ -293,8 +335,8 @@ public class Queen : MonoBehaviour
         {
             guard.followQueen = false;
             guard.walking = true;
-            guard.head.target = page;
-            guard.victim = page;
+            guard.target = page.head;
+            guard.victim = page.tr;
         }
     }
 
@@ -302,11 +344,11 @@ public class Queen : MonoBehaviour
     {
         guardOne.followQueen = true;
         guardOne.walking = true;
-        guardOne.head.target = null;
+        guardOne.target = null;
         guardOne.victim = null;
         guardTwo.followQueen = true;
         guardTwo.walking = true;
-        guardTwo.head.target = null;
+        guardTwo.target = null;
         guardTwo.victim = null;
     }
 
@@ -345,102 +387,126 @@ public class Queen : MonoBehaviour
 
     IEnumerator Shout()
     {
-        if (!killed)
+        if (!killed && storyteller.guardCount > 0 && victim != null)
         {
             speechBubble.SetText("What is this?!"); 
             yield return new WaitForSeconds(3);
         }
         else
         {
+            walking = true;
+            speechBubble.SetText("");
             yield break;
         }
-        if (!killed)
+        if (!killed && storyteller.guardCount > 0 && victim != null)
         {
             speechBubble.SetText("");
             yield return new WaitForSeconds(3);
         }
         else
         {
+            walking = true;
+            speechBubble.SetText("");
             yield break;
         }
-        if (!killed)
+        if (!killed && storyteller.guardCount > 0 && victim != null)
         {
             speechBubble.SetText("I said, what is this?!");
             yield return new WaitForSeconds(3);
         }
         else
         {
+            walking = true;
+            speechBubble.SetText("");
             yield break;
         }
-        if (!killed)
+        if (!killed && storyteller.guardCount > 0 && victim != null)
         {
             speechBubble.SetText("");
             yield return new WaitForSeconds(3);
         }
         else
         {
+            walking = true;
+            speechBubble.SetText("");
             yield break;
         }
-        if (!killed)
+        if (!killed && storyteller.guardCount > 0 && victim != null)
         {
             speechBubble.SetText("Tell me!");
             yield return new WaitForSeconds(3);
         }
         else
         {
+            walking = true;
+            speechBubble.SetText("");
             yield break;
         }
-        if (!killed)
+        if (!killed && storyteller.guardCount > 0 && victim != null)
         {
             speechBubble.SetText("");
             yield return new WaitForSeconds(3);
         }
         else
         {
+            walking = true;
+            speechBubble.SetText("");
             yield break;
         }
-        if (!killed)
+        if (!killed && storyteller.guardCount > 0 && victim != null)
         {
             speechBubble.SetText("Enough!");
             yield return new WaitForSeconds(2);
         }
         else
         {
+            walking = true;
+            speechBubble.SetText("");
             yield break;
         }
-        if (!killed)
+        if (!killed && storyteller.guardCount > 0 && victim != null)
         {
             speechBubble.SetText("Guards!");
             yield return new WaitForSeconds(1);
         }
         else
         {
+            walking = true;
+            speechBubble.SetText("");
             yield break;
         }
-        if (!killed)
+        if (!killed && storyteller.guardCount > 0 && victim != null)
         {
             speechBubble.SetText("");
-            head.target = page;
+            target = page.head;
             guardOne.followQueen = false;
-            guardOne.head.target = page;
-            guardOne.victim = page;
+            guardOne.target = page.head;
+            guardOne.victim = page.tr;
 
             guardTwo.followQueen = false;
-            guardTwo.head.target = page;
-            guardTwo.victim = page;
+            guardTwo.target = page.head;
+            guardTwo.victim = page.tr;
             yield return new WaitForSeconds(10);
         }
         else
         {
+            walking = true;
+            speechBubble.SetText("");
             yield break;
         }
-        if (!killed)
+        if (!killed && storyteller.guardCount > 0 && victim != null)
         {
             speechBubble.SetText("Alarm!");
             Alarm();
             yield return new WaitForSeconds(3);
             speechBubble.SetText("");
         }
+        while (!killed && storyteller.guardCount > 0 && victim != null)
+        {
+            yield return new WaitForSeconds(1);
+        }
+        walking = true;
+        speechBubble.SetText("");
     }
 
     public IEnumerator Panic()
@@ -451,12 +517,21 @@ public class Queen : MonoBehaviour
         speechBubble.SetText("Alarm!");
         Alarm();
         yield return new WaitForSeconds(3);
-        while (grabbed)
+        while (!grounded)
         {
             random = new System.Random();
             speechBubble.SetText(panicList[random.Next(panicList.Length)]);
             yield return new WaitForSeconds(3);
             speechBubble.SetText("");
+        }
+    }
+
+    void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.tag == "Floor")
+        {
+            grounded = true;
+            rb.drag = 5;
         }
     }
 }

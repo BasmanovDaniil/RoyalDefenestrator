@@ -7,8 +7,10 @@ public class Page : MonoBehaviour
     public LayerMask throwableLayer;
     public LayerMask characterLayer;
     public bool grabbed;
+    public Transform head;
 
-    private Transform tr;
+    [HideInInspector] public Transform tr;
+
     private Rigidbody rb;
     private Vector3 direction;
     private Collider[] throwables;
@@ -53,24 +55,24 @@ public class Page : MonoBehaviour
                             item = character.rigidbody;
                             item.useGravity = false;
                             item.isKinematic = true;
+                            item.drag = 0;
                             if (item.tag == "Queen")
                             {
-                                item.GetComponent<Queen>().grabbed = true;
+                                item.GetComponent<Queen>().grounded = false;
                                 StartCoroutine(item.GetComponent<Queen>().Panic());
+                            }
+                            
+                            if (item.tag == "Cat" || item.name == "Cat")
+                            {
+                                item.GetComponent<Cat>().grounded = false;
+                                StartCoroutine(item.GetComponent<Cat>().Panic());
                             }
                             if (item.tag == "Guard")
                             {
-                                item.GetComponent<Guard>().grabbed = true;
+                                item.GetComponent<Guard>().grounded = false;
                                 StartCoroutine(item.GetComponent<Guard>().Panic());
                             }
-                            if (item.tag == "Cat" || item.name == "Cat")
-                            {
-                                item.GetComponent<Cat>().grabbed = true;
-                                StartCoroutine(item.GetComponent<Cat>().Panic());
-                            }
-
-                            item.GetComponent<Head>().grabbed = true;
-                            item.drag = 0;
+                            
                             break;
                         }
                     }
@@ -85,25 +87,8 @@ public class Page : MonoBehaviour
             }
             else
             {
-                if (isCharacter)
-                {
-                    item.GetComponent<Head>().grabbed = false;
-                    if (item.tag == "Queen")
-                    {
-                        item.GetComponent<Queen>().grabbed = false;
-                    }
-                    if (item.tag == "Guard")
-                    {
-                        item.GetComponent<Guard>().grabbed = false;
-                    }
-                    if (item.tag == "Cat" || item.name == "Cat")
-                    {
-                        item.GetComponent<Cat>().grabbed = false;
-                    }
-                }
                 item.useGravity = true;
                 item.isKinematic = false;
-                item.rotation = Quaternion.identity;
                 item.AddForce((tr.forward + tr.up + Vector3.ClampMagnitude(rb.velocity, 1)) * throwForce);
                 item = null;
             }
@@ -146,6 +131,6 @@ public class Page : MonoBehaviour
         {
             tr.rotation = Quaternion.Slerp(tr.rotation, Quaternion.LookRotation(direction, Vector3.up), 10 * Time.deltaTime);
         }
-        rb.AddForce(tr.forward * moveSpeed * Time.deltaTime);
+        rb.AddForce(direction.normalized * moveSpeed * Time.deltaTime);
 	}
 }

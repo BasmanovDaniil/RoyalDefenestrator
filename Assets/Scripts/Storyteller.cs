@@ -151,43 +151,59 @@ public class Storyteller : MonoBehaviour
     {
         firstVictim.tag = "FirstVictim";
         yield return new WaitForSeconds(2);
-        if (guardOne.grabbed)
+        if (!guardOne.grounded)
+        {
+            guardOneSpeechBubble.SetText("");
+            StartScenario();
+            yield break;
+        }
+        else
+        {
+            guardOneSpeechBubble.SetText("Looks like our queen is in a bad mood");
+            yield return new WaitForSeconds(4);
+        }
+        if (!guardOne.grounded)
+        {
+            guardOneSpeechBubble.SetText("");
+            StartScenario();
+            yield break;
+        }
+        else
+        {
+            guardOneSpeechBubble.SetText("");
+            yield return new WaitForSeconds(1);
+        }
+        if (!guardOne.grounded)
+        {
+            guardOneSpeechBubble.SetText("");
+            StartScenario();
+            yield break;
+        }
+        else
+        {
+            guardOneSpeechBubble.SetText("*SIGH*");
+            yield return new WaitForSeconds(3);
+        }
+        if (!guardOne.grounded)
         {
             StartScenario();
             yield break;
         }
-        guardOneSpeechBubble.SetText("Looks like our queen is in a bad mood");
-        yield return new WaitForSeconds(4);
-        if (guardOne.grabbed)
+        else
         {
+            guardOneSpeechBubble.SetText("");
+            yield return new WaitForSeconds(1);
+        }
+        if (!guardOne.grounded)
+        {
+            guardOneSpeechBubble.SetText("");
             StartScenario();
             yield break;
         }
-        guardOneSpeechBubble.SetText("");
-        yield return new WaitForSeconds(1);
-        if (guardOne.grabbed)
-        {
-            StartScenario();
-            yield break;
-        }
-        guardOneSpeechBubble.SetText("*SIGH*");
-        yield return new WaitForSeconds(3);
-        if (guardOne.grabbed)
-        {
-            StartScenario();
-            yield break;
-        }
-        guardOneSpeechBubble.SetText("");
-        yield return new WaitForSeconds(1);
-        if (guardOne.grabbed)
-        {
-            StartScenario();
-            yield break;
-        }
-        if (!firstVictimDead)
+        else if (!firstVictimDead)
         {
             guardOneSpeechBubble.SetText("Hey! What is this?!");
-            guardOne.head.target = firstVictim;
+            guardOne.target = firstVictim;
             var clone = Instantiate(indicatorPrefab, firstVictim.position, Quaternion.identity) as GameObject;
             clone.transform.parent = firstVictim;
             yield return new WaitForSeconds(3);
@@ -202,12 +218,13 @@ public class Storyteller : MonoBehaviour
             StartScenario();
             yield break;
         }
-        if (guardOne.grabbed)
+        if (!guardOne.grounded)
         {
+            guardOneSpeechBubble.SetText("");
             StartScenario();
             yield break;
         }
-        if (!firstVictimDead)
+        else if (!firstVictimDead)
         {
             guardOneSpeechBubble.SetText("Oh, No-no-no-no!");
             yield return new WaitForSeconds(3);
@@ -222,12 +239,13 @@ public class Storyteller : MonoBehaviour
             StartScenario();
             yield break;
         }
-        if (guardOne.grabbed)
+        if (!guardOne.grounded)
         {
+            guardOneSpeechBubble.SetText("");
             StartScenario();
             yield break;
         }
-        if (!firstVictimDead)
+        else if (!firstVictimDead)
         {
             guardOneSpeechBubble.SetText("Quick! Hide that! Throw it to window!");
             yield return new WaitForSeconds(3);
@@ -242,12 +260,13 @@ public class Storyteller : MonoBehaviour
             StartScenario();
             yield break;
         }
-        if (guardOne.grabbed)
+        if (!guardOne.grounded)
         {
+            guardOneSpeechBubble.SetText("");
             StartScenario();
             yield break;
         }
-        if (!firstVictimDead)
+        else if (!firstVictimDead)
         {
             guardOneSpeechBubble.SetText("There is no time! Throw it!");
             yield return new WaitForSeconds(3);
@@ -262,14 +281,15 @@ public class Storyteller : MonoBehaviour
             StartScenario();
             yield break;
         }
-        if (guardOne.grabbed)
+        if (!guardOne.grounded)
         {
+            guardOneSpeechBubble.SetText("");
             StartScenario();
             yield break;
         }
-        if (!firstVictimDead)
+        else if (!firstVictimDead)
         {
-            guardOneSpeechBubble.SetText("Throw it! Throw it to window!");
+            guardOneSpeechBubble.SetText("Throw it!");
             yield return new WaitForSeconds(3);
             guardOneSpeechBubble.SetText("");
             yield return new WaitForSeconds(3);
@@ -282,12 +302,13 @@ public class Storyteller : MonoBehaviour
             StartScenario();
             yield break;
         }
-        if (guardOne.grabbed)
+        if (!guardOne.grounded)
         {
+            guardOneSpeechBubble.SetText("");
             StartScenario();
             yield break;
         }
-        if (!firstVictimDead)
+        else if (!firstVictimDead)
         {
             guardOneSpeechBubble.SetText("Ok, your choice");
             yield return new WaitForSeconds(3);
