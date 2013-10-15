@@ -1,5 +1,6 @@
 RoyalDefenestrator
 ==================
+![](http://habrastorage.org/storage3/148/119/f26/148119f263dc9d695675f9c044c8a5b6.jpg)
 
 Looks like our queen is in a bad mood. You better hurry throw that table out of that window...
 
