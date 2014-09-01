@@ -18,6 +18,7 @@ public class Queen : MonoBehaviour
     public GameObject indicatorPrefab;
     public bool walking = true;
     public bool grounded = true;
+    public Transform cat;
     public bool catKilled;
     public Storyteller storyteller;
     public Transform target;
@@ -58,6 +59,11 @@ public class Queen : MonoBehaviour
             SetTarget(targetList[0]);
         }
 	    StartCoroutine(UpdatePath());
+    }
+
+    void Update()
+    {
+        Debug.DrawRay(tr.position, (cat.position - tr.position).normalized*15, Color.red);
     }
 
 	void FixedUpdate ()
@@ -288,7 +294,8 @@ public class Queen : MonoBehaviour
         else
         {
             speechBubble.SetText("There you are!");
-            yield return new WaitForSeconds(3);
+            target = cat;
+            yield return new WaitForSeconds(2);
             storyteller.GoodEnding();
         }
     }
@@ -385,11 +392,40 @@ public class Queen : MonoBehaviour
         walking = true;
     }
 
-    IEnumerator Shout()
+    public IEnumerator LookAtCat()
     {
-        if (!killed && storyteller.guardCount > 0 && victim != null)
+        if (!grounded) yield break;
+
+        walking = false;
+
+        if (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
         {
-            speechBubble.SetText("What is this?!"); 
+            speechBubble.SetText("What is this?");
+            target = cat;
+            guardOne.target = cat;
+            guardTwo.target = cat;
+            if (indicator == null)
+            {
+                var clone = Instantiate(indicatorPrefab, cat.position, Quaternion.identity) as GameObject;
+                indicator = clone.transform;
+                indicator.parent = cat;
+            }
+            yield return new WaitForSeconds(2);
+        }
+        else
+        {
+            walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
+            speechBubble.SetText("");
+            yield break;
+        }
+        if (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
+        {
+            speechBubble.SetText("");
             yield return new WaitForSeconds(3);
         }
         else
@@ -403,23 +439,7 @@ public class Queen : MonoBehaviour
             speechBubble.SetText("");
             yield break;
         }
-        if (!killed && storyteller.guardCount > 0 && victim != null)
-        {
-            speechBubble.SetText("");
-            yield return new WaitForSeconds(3);
-        }
-        else
-        {
-            walking = true;
-            target = null;
-            if (indicator != null)
-            {
-                Destroy(indicator.gameObject);
-            }
-            speechBubble.SetText("");
-            yield break;
-        }
-        if (!killed && storyteller.guardCount > 0 && victim != null)
+        if (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
         {
             speechBubble.SetText("I said, what is this?!");
             yield return new WaitForSeconds(3);
@@ -435,7 +455,7 @@ public class Queen : MonoBehaviour
             speechBubble.SetText("");
             yield break;
         }
-        if (!killed && storyteller.guardCount > 0 && victim != null)
+        if (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
         {
             speechBubble.SetText("");
             yield return new WaitForSeconds(3);
@@ -451,7 +471,7 @@ public class Queen : MonoBehaviour
             speechBubble.SetText("");
             yield break;
         }
-        if (!killed && storyteller.guardCount > 0 && victim != null)
+        if (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
         {
             speechBubble.SetText("Tell me!");
             yield return new WaitForSeconds(3);
@@ -467,7 +487,7 @@ public class Queen : MonoBehaviour
             speechBubble.SetText("");
             yield break;
         }
-        if (!killed && storyteller.guardCount > 0 && victim != null)
+        if (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
         {
             speechBubble.SetText("");
             yield return new WaitForSeconds(3);
@@ -483,7 +503,7 @@ public class Queen : MonoBehaviour
             speechBubble.SetText("");
             yield break;
         }
-        if (!killed && storyteller.guardCount > 0 && victim != null)
+        if (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
         {
             speechBubble.SetText("Enough!");
             yield return new WaitForSeconds(2);
@@ -499,7 +519,7 @@ public class Queen : MonoBehaviour
             speechBubble.SetText("");
             yield break;
         }
-        if (!killed && storyteller.guardCount > 0 && victim != null)
+        if (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
         {
             speechBubble.SetText("Guards!");
             yield return new WaitForSeconds(1);
@@ -515,7 +535,7 @@ public class Queen : MonoBehaviour
             speechBubble.SetText("");
             yield break;
         }
-        if (!killed && storyteller.guardCount > 0 && victim != null)
+        if (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
         {
             speechBubble.SetText("");
             target = page.head;
@@ -539,14 +559,188 @@ public class Queen : MonoBehaviour
             speechBubble.SetText("");
             yield break;
         }
-        if (!killed && storyteller.guardCount > 0 && victim != null)
+        if (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
         {
             speechBubble.SetText("Alarm!");
             Alarm();
             yield return new WaitForSeconds(3);
             speechBubble.SetText("");
         }
-        while (!killed && storyteller.guardCount > 0 && victim != null)
+        while (grounded && storyteller.guardCount > 0 && !catKilled && Vector3.Distance(tr.position, cat.position) < 15)
+        {
+            yield return new WaitForSeconds(1);
+        }
+        walking = true;
+        target = null;
+        if (indicator != null)
+        {
+            Destroy(indicator.gameObject);
+        }
+        speechBubble.SetText("");
+    }
+
+    IEnumerator Shout()
+    {
+        if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
+        {
+            speechBubble.SetText("What is this?!"); 
+            yield return new WaitForSeconds(3);
+        }
+        else
+        {
+            walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
+            speechBubble.SetText("");
+            yield break;
+        }
+        if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
+        {
+            speechBubble.SetText("");
+            yield return new WaitForSeconds(3);
+        }
+        else
+        {
+            walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
+            speechBubble.SetText("");
+            yield break;
+        }
+        if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
+        {
+            speechBubble.SetText("I said, what is this?!");
+            yield return new WaitForSeconds(3);
+        }
+        else
+        {
+            walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
+            speechBubble.SetText("");
+            yield break;
+        }
+        if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
+        {
+            speechBubble.SetText("");
+            yield return new WaitForSeconds(3);
+        }
+        else
+        {
+            walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
+            speechBubble.SetText("");
+            yield break;
+        }
+        if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
+        {
+            speechBubble.SetText("Tell me!");
+            yield return new WaitForSeconds(3);
+        }
+        else
+        {
+            walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
+            speechBubble.SetText("");
+            yield break;
+        }
+        if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
+        {
+            speechBubble.SetText("");
+            yield return new WaitForSeconds(3);
+        }
+        else
+        {
+            walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
+            speechBubble.SetText("");
+            yield break;
+        }
+        if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
+        {
+            speechBubble.SetText("Enough!");
+            yield return new WaitForSeconds(2);
+        }
+        else
+        {
+            walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
+            speechBubble.SetText("");
+            yield break;
+        }
+        if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
+        {
+            speechBubble.SetText("Guards!");
+            yield return new WaitForSeconds(1);
+        }
+        else
+        {
+            walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
+            speechBubble.SetText("");
+            yield break;
+        }
+        if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
+        {
+            speechBubble.SetText("");
+            target = page.head;
+            guardOne.followQueen = false;
+            guardOne.target = page.head;
+            guardOne.victim = page.tr;
+
+            guardTwo.followQueen = false;
+            guardTwo.target = page.head;
+            guardTwo.victim = page.tr;
+            yield return new WaitForSeconds(10);
+        }
+        else
+        {
+            walking = true;
+            target = null;
+            if (indicator != null)
+            {
+                Destroy(indicator.gameObject);
+            }
+            speechBubble.SetText("");
+            yield break;
+        }
+        if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
+        {
+            speechBubble.SetText("Alarm!");
+            Alarm();
+            yield return new WaitForSeconds(3);
+            speechBubble.SetText("");
+        }
+        while (grounded && !killed && storyteller.guardCount > 0 && victim != null)
         {
             yield return new WaitForSeconds(1);
         }
