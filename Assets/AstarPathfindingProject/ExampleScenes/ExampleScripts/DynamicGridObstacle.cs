@@ -20,8 +20,8 @@ public class DynamicGridObstacle : MonoBehaviour {
 	
 	/** Use this for initialization */
 	void Start () {
-		col = collider;
-		if (collider == null) {
+		col = GetComponent<Collider>();
+		if (GetComponent<Collider>() == null) {
 			Debug.LogError ("A collider must be attached to the GameObject for DynamicGridObstacle to work");
 		}
 		StartCoroutine (UpdateGraphs ());
@@ -60,12 +60,9 @@ public class DynamicGridObstacle : MonoBehaviour {
 			   	Mathf.Abs (maxDiff.x) > updateError || Mathf.Abs (maxDiff.y) > updateError || Mathf.Abs (maxDiff.z) > updateError) {
 				
 				//Update the graphs as soon as possible
-				//DoUpdateGraphs and DoUpdateGraphs2 will be called (in order) when there is an opportunity to update graphs
 				isWaitingForUpdate = true;
 				/** \bug Fix Update Graph Passes */
 				DoUpdateGraphs ();
-				//AstarPath.active.RegisterCanUpdateGraphs (DoUpdateGraphs, DoUpdateGraphs2);
-				
 			}
 			
 			yield return new WaitForSeconds (checkTime);
@@ -90,51 +87,26 @@ public class DynamicGridObstacle : MonoBehaviour {
 		isWaitingForUpdate = false;
 		Bounds newBounds = col.bounds;
 		
-		//if (!simple) {
-			Bounds merged = newBounds;
-			merged.Encapsulate (prevBounds);
-			
-			if (BoundsVolume (merged) < BoundsVolume (newBounds)+BoundsVolume(prevBounds)) {
-				AstarPath.active.UpdateGraphs (merged);
-			} else {
-				AstarPath.active.UpdateGraphs (prevBounds);
-				AstarPath.active.UpdateGraphs (newBounds);
-			}
-		/*} else {
-			GraphUpdateObject guo = new GraphUpdateObject (prevBounds);
-			guo.updatePhysics = false;
-			guo.modifyWalkability = true;
-			guo.setWalkability = true;
-			
-			AstarPath.active.UpdateGraphs (guo);
-		}*/
+		Bounds merged = newBounds;
+		merged.Encapsulate (prevBounds);
+		
+		// Check what seems to be fastest, to update the union of prevBounds and newBounds in a single request
+		// or to update them separately, the smallest volume is usually the fastest
+		if (BoundsVolume (merged) < BoundsVolume (newBounds)+BoundsVolume(prevBounds)) {
+			// Send an update request to update the nodes inside the 'merged' volume
+			AstarPath.active.UpdateGraphs (merged);
+		} else {
+			// Send two update request to update the nodes inside the 'prevBounds' and 'newBounds' volumes
+			AstarPath.active.UpdateGraphs (prevBounds);
+			AstarPath.active.UpdateGraphs (newBounds);
+		}
 		
 		
 		prevBounds = newBounds;
 	}
 	
-	/*public void DoUpdateGraphs2 () {
-		if (col == null) { return; }
-		
-		if (simple) {
-			GraphUpdateObject guo = new GraphUpdateObject (col.bounds);
-			guo.updatePhysics = false;
-			guo.modifyWalkability = true;
-			guo.setWalkability = false;
-			AstarPath.active.UpdateGraphs (guo);
-		}
-	}*/
-	
-	/* Returns a new Bounds object which contains both \a b1 and \a b2 */
-	/*public Rect ExpandToContain (Bounds b1, Bounds b2) {
-		Vector3 min = Vector3.Min (b1.min,b2.min);
-		Vector3 max = Vector3.Max (b1.max,b2.max);
-		
-		return new Bounds ((max+min)*0.5F,max-min);
-	}*/
-	
 	/** Returns the volume of a Bounds object. X*Y*Z */
-	public float BoundsVolume (Bounds b) {
+	static float BoundsVolume (Bounds b) {
 		return System.Math.Abs (b.size.x * b.size.y * b.size.z);
 	}
 }

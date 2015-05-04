@@ -5,3 +5,12 @@ Their respective licenses are included in the folders.
 
 The Json library with modifications is hosted at bitbucket:
 	https://bitbucket.org/TowerOfBricks/jsonfx-for-unity3d
+
+Clipper Library with modifications:
+	https://bitbucket.org/TowerOfBricks/clipper
+
+Poly2Tri with modifications:
+	https://github.com/HalfVoxel/poly2tri-cs
+
+DotNetZip with modifications:
+	https://github.com/HalfVoxel/DotNetZip

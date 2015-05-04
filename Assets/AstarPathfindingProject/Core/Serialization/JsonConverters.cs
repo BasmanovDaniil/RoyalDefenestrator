@@ -1,16 +1,30 @@
+//#define ASTAR_NO_JSON
+
 using System;
 using UnityEngine;
 using Pathfinding.Serialization.JsonFx;
-
+#if NETFX_CORE
+using System.Reflection;
+#endif
 using System.Collections.Generic;
+#if NETFX_CORE && !UNITY_EDITOR
+//using MarkerMetro.Unity.WinLegacy.IO;
+//using MarkerMetro.Unity.WinLegacy.Reflection;
+#endif
+
+#if !ASTAR_NO_JSON
 
 namespace Pathfinding.Serialization
 {
 	
 	public class UnityObjectConverter : JsonConverter {
-		
+
 		public override bool CanConvert (Type type) {
+#if NETFX_CORE
+			return typeof(UnityEngine.Object).GetTypeInfo().IsAssignableFrom (type.GetTypeInfo());
+#else
 			return typeof(UnityEngine.Object).IsAssignableFrom (type);
+#endif
 		}
 		
 		public override object ReadJson ( Type objectType, Dictionary<string,object> values) {
@@ -21,11 +35,13 @@ namespace Pathfinding.Serialization
 			//int instanceID = (int)values["InstanceID"];
 			
 			string name = (string)values["Name"];
-			
+
+			if ( name == null ) return null;
+
 			string typename = (string)values["Type"];
 			Type type = Type.GetType (typename);
 			
-			if (type == null) {
+			if (System.Type.Equals (type, null)) {
 				Debug.LogError ("Could not find type '"+typename+"'. Cannot deserialize Unity reference");
 				return null;
 			}
@@ -33,11 +49,11 @@ namespace Pathfinding.Serialization
 			if (values.ContainsKey ("GUID")) {
 				string guid = (string)values["GUID"];
 				
-				UnityReferenceHelper[] helpers = UnityEngine.Object.FindSceneObjectsOfType (typeof(UnityReferenceHelper)) as UnityReferenceHelper[];
+				UnityReferenceHelper[] helpers = UnityEngine.Object.FindObjectsOfType(typeof(UnityReferenceHelper)) as UnityReferenceHelper[];
 				
 				for (int i=0;i<helpers.Length;i++) {
 					if (helpers[i].GetGUID () == guid) {
-						if (type == typeof(GameObject)) {
+						if (System.Type.Equals ( type, typeof(GameObject) )) {
 							return helpers[i].gameObject;
 						} else {
 							return helpers[i].GetComponent (type);
@@ -64,9 +80,15 @@ namespace Pathfinding.Serialization
 			
 			
 			Dictionary<string, object> dict = new Dictionary<string, object>();
-			
-			dict.Add ("InstanceID",obj.GetInstanceID());
+
+
+			if ( value == null ) {
+				dict.Add ("Name",null);
+				return dict;
+			}
+
 			dict.Add ("Name",obj.name);
+
 			dict.Add ("Type",obj.GetType().AssemblyQualifiedName);
 			
 			//Write scene path if the object is a Component or GameObject
@@ -96,7 +118,7 @@ namespace Pathfinding.Serialization
 	
 	public class GuidConverter : JsonConverter {
 		public override bool CanConvert (Type type) {
-			return type == typeof(Pathfinding.Util.Guid);
+			return System.Type.Equals ( type, typeof(Pathfinding.Util.Guid) );
 		}
 		
 		public override object ReadJson ( Type objectType, Dictionary<string,object> values) {
@@ -113,7 +135,7 @@ namespace Pathfinding.Serialization
 	
 	public class MatrixConverter : JsonConverter {
 		public override bool CanConvert (Type type) {
-			return type == typeof(Matrix4x4);
+			return System.Type.Equals ( type, typeof(Matrix4x4) );
 		}
 		
 		public override object ReadJson ( Type objectType, Dictionary<string,object> values) {
@@ -124,8 +146,8 @@ namespace Pathfinding.Serialization
 				Debug.LogError ("Number of elements in matrix was not 16 (got "+arr.Length+")");
 				return m;
 			}
-			
-			for (int i=0;i<16;i++) m[i] = System.Convert.ToSingle (arr.GetValue(i));
+
+			for (int i=0;i<16;i++) m[i] = System.Convert.ToSingle (arr.GetValue(new int[] {i}));
 			
 			return m;
 		}
@@ -146,7 +168,7 @@ namespace Pathfinding.Serialization
 	
 	public class BoundsConverter : JsonConverter {
 		public override bool CanConvert (Type type) {
-			return type == typeof(Bounds);
+			return System.Type.Equals ( type, typeof(Bounds) );
 		}
 		
 		public override object ReadJson ( Type objectType, Dictionary<string,object> values) {
@@ -171,7 +193,7 @@ namespace Pathfinding.Serialization
 	
 	public class LayerMaskConverter : JsonConverter {
 		public override bool CanConvert (Type type) {
-			return type == typeof(LayerMask);
+			return System.Type.Equals ( type, typeof(LayerMask) );
 		}
 		
 		public override object ReadJson (Type type, Dictionary<string,object> values) {
@@ -186,15 +208,15 @@ namespace Pathfinding.Serialization
 	public class VectorConverter : JsonConverter
 	{
 		public override bool CanConvert (Type type) {
-			return type == typeof(Vector2) || type==typeof(Vector3)||type==typeof(Vector4);
+			return System.Type.Equals ( type, typeof(Vector2) ) || System.Type.Equals ( type, typeof(Vector3) )||System.Type.Equals ( type, typeof(Vector4) );
 		}
 		
 		public override object ReadJson (Type type, Dictionary<string,object> values) {
-			if (type == typeof(Vector2)) {
+			if (System.Type.Equals ( type, typeof(Vector2) )) {
 				return new Vector2(CastFloat(values["x"]),CastFloat(values["y"]));
-			} else if (type == typeof(Vector3)) {
+			} else if (System.Type.Equals ( type, typeof(Vector3) )) {
 				return new Vector3(CastFloat(values["x"]),CastFloat(values["y"]),CastFloat(values["z"]));
-			} else if (type == typeof(Vector4)) {
+			} else if (System.Type.Equals ( type, typeof(Vector4) )) {
 				return new Vector4(CastFloat(values["x"]),CastFloat(values["y"]),CastFloat(values["z"]),CastFloat(values["w"]));
 			} else {
 				throw new System.NotImplementedException ("Can only read Vector2,3,4. Not objects of type "+type);
@@ -202,21 +224,20 @@ namespace Pathfinding.Serialization
 		}
 		
 		public override Dictionary<string,object> WriteJson (Type type, object value) {
-			if (type == typeof(Vector2)) {
+			if (System.Type.Equals ( type, typeof(Vector2) )) {
 				Vector2 v = (Vector2)value;
 				return new Dictionary<string, object>() {
 					{"x",v.x},
 					{"y",v.y}
 				};
-			} else if (type == typeof(Vector3)) {
+			} else if (System.Type.Equals ( type, typeof(Vector3) )) {
 				Vector3 v = (Vector3)value;
 				return new Dictionary<string, object>() {
 					{"x",v.x},
 					{"y",v.y},
 					{"z",v.z}
 				};
-			} else if (type
-			           == typeof(Vector4)) {
+			} else if (System.Type.Equals ( type, typeof(Vector4) )) {
 				Vector4 v = (Vector4)value;
 				return new Dictionary<string, object>() {
 					{"x",v.x},
@@ -233,7 +254,7 @@ namespace Pathfinding.Serialization
 	 */
 	public class IntKeyDictionaryConverter : JsonConverter {
         public override bool CanConvert (Type type) {
-            return ( type == typeof(Dictionary<int,int>) || type == typeof(SortedDictionary<int,int>) );
+            return ( System.Type.Equals (type, typeof(Dictionary<int,int>)) || System.Type.Equals (type, typeof(SortedDictionary<int,int>)) );
         }
         
         public override object ReadJson (Type type, Dictionary<string,object> values) {
@@ -259,4 +280,4 @@ namespace Pathfinding.Serialization
     }
 }
 
-
+#endif

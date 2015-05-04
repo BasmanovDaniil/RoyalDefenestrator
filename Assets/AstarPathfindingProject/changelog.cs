@@ -1,8 +1,326 @@
-/** \file
- * This file contains the changelog for the A* Pathfinding Project.
- */
-
 /** \page changelog Changelog
+
+- 3.6 (2015-02-02)
+	- Upgrade notes:
+		- Cache data for faster startup is now stored in a separate file.\n
+			This reduces the huge lag some users have been experiencing since Unity changed their Undo system.\n
+			You will need to open the AstarPath components which used cached startup, go to the save and load tab
+			and press a button labeled "Transfer cache data to a separate file".
+	- Highlights:
+		- Added support for the Jump Point Search algorithm on grid graphs (pro only).\n
+			The JPS algorithm can be used to speed up pathfinding on grid graphs *without any penalties or tag weights applied* (it only works on uniformly weighted graphs).
+			It can be several times faster than normal A*.
+			It works best on open areas.
+		- Added support for heuristic optimizations (pro only).\n
+			This can be applied on any static graph, i.e any graph which does not change.
+			It requires a rather slow preprocessing step so graph updates will be really slow when using this.
+			However when the preprocessing is done, it can speed up pathfinding with an order of magnitude.
+			It works especially well in mazes with lots of options and dead ends.\n
+			Combined with JPS (mentioned above) I have seen it perform up to 20x better than regular A* with no heuristic optimizations.
+		- Added PointNode.gameObject which will contain the GameObject each node was created from.
+		- Added support for RVO obstacles.\n
+			It is by no means perfect at this point, but at least it works.
+		- Undo works reasonably well again.\n
+			It took a lot of time working around weird Unity behaviours.
+			For example Unity seems to send undo events when dragging items to object fields (why? no idea).
+		- Dragging meshes to the NavmeshGraph.SourceMesh field works again.\n
+			See fix about undo above.
+		- Extended the max number of possible areas (connected components) to 2^17 = 131072 up from 2^10 = 1024.\n
+			No memory usage increase, just shuffling bits around.\n
+			Deprecated compiler directive ASTAR_MORE_AREAS
+		- Extended the max number of graphs in the inspector to 256 up from 4 or 32 depending on settings.\n
+			No memory usage increase, just shuffling bits around.
+			I still don't recommend that you actually use this many graphs.
+		- Added RecastTileUpdate and RecastTileUpdateHandler scripts for easier recast tile updating with good performance.
+		- When using A* Inspector -> Settings -> Debug -> Path Debug Mode = {G,F,H,Penalties}
+			you previously had to set the limits for what should be displayed as "red" in the scene view yourself, this is now
+			optionally automatically calculated. The UI for it has also been improved.
+	- Improvements:
+		- Added penaltyAnglePower to Grid Graph -> Extra -> Penalty from Angle.\n
+			This can be used to increase the penalty even more for large angles than for small angles (more than it already does, that is).
+		- ASTAR_NO_JSON now works for recast graphs as well.
+		- Added custom inspector for RecastMeshObj, hopefully it will not be as confusing anymore.
+	- Changes:
+		- FleePath now has a default flee strength of 1 to avoid confusion when the FleePath doesn't seem to flee from anything.
+		- Removed some irrelevant defines from the Optimizations tab.
+		- IAgent.Position cannot be changed anymore, instead use the Teleport and SetYPosition methods.
+		- Exposed GraphUpdateObject.changedNodes.
+		- Deprecated the threadSafe paremeter on RegisterSafeUpdate, it is always treated as true now.
+		- The default value for AstarPath.minAreaSize is now 0 since the number of areas (connected component) indices has been greatly increased (see highlights).
+		- Tweaked ProceduralWorld script (used for the "Procedural" example scene) to reduce FPS drops.
+	- Fixes:
+		- AstarPath.FlushGraphUpdates will now complete all graph updates instead of just making sure they have started.\n
+			In addition to avoiding confusion, this fixes a rare null reference exception which could happen when using 
+			the GraphUpdateUtilities.UpdateGraphsNoBlock method.
+		- Fixed some cases where updating recast graphs could throw exceptions. (message begun with "No Voxelizer object. UpdateAreaInit...")
+		- Fixed typo in RVOSimulator. desiredSimulatonFPS -> desiredSimulationFPS.
+		- RVO agents move smoother now (previously their velocity could change widely depending on the fps, the average velocity was correct however)
+		- Fixed an exception which could, with some graph settings, be thrown when deserializing on iPhone when bytecode stripping was enabled.
+		- Fixed a NullReferenceException in MultiTargetPath which was thrown if the path debug mode was set to "Heavy".
+		- Fixed PathUtilies.BFS always returning zero nodes (thanks Ajveach).
+		- Made reverting GraphUpdateObjects work. The GraphUpdateUtilities.UpdateGraphsNoBlock was also fixed by this change.
+		- Fixed compile error with monodevelop.
+		- Fixed a bug which caused scanning to fail if more than one NavmeshGraph existed.
+		- Fixed the lightweight local avoidance example scene which didn't work previously.
+		- Fixed SimpleSmoothModifier not exposing Roundness Factor in the editor for the Curved Nonuniform mode.
+		- Fixed an exception when updating RecastGraphs and using RelevantGraphSurfaces and multithreading.
+		- Fixed exceptions caused by starting paths from other threads than the Unity thread.
+		- Fixed an infinite loop/out of memory exception that could occur sometimes when graph updates were being done at the start of the game (I hate multithreading race conditions).
+		- Fixed the Optimizations tab not working when JS Support was enabled.
+		- Fixed graph updating not working on navmesh graphs (it was broken before due to a missing line of code).
+		- Fixed some misspelled words in the documentation.
+		- Removed some unused and/or redundant variables.
+		- Fixed a case where graphs added using code might not always be configured correctly (and would throw exceptions when scanning).
+		- Improved Windows Store compatibility.
+		- Fixed a typo in the GridGraph which could cause compilation to fail when building for Windows Phone or Windows Store (thanks MariuszP)
+		- Lots of code cleanups and comments added to various scripts.
+		- Fixed some cases where MonoDevelop would pick up the wrong documention for fields since it doesn't support all features that Doxygen supports.
+		- Fixed a bug which caused the points field on GraphUpdateScene to sometimes not be editable.
+		- Fixed a bug which could cause RVO agents not to move if the fps was low and Interpolation and Double Buffering was used.
+		- Set the execution order for RVOController and RVOSimulator to make sure that other scripts will
+			get the latest position in their Update method.
+		- Fixed a bug which could cause some nearest point on line methods in AstarMath to return NaN.
+			This could happen when Seeker->Start End Modifier->StartPoint and EndPoint was set to Interpolate.
+		- Fixed a runtime error on PS Vita.
+		- Fixed an index out of range exception which could occur when scanning LayeredGridGraphs.
+		- Fixed an index out of range exception which could occur when drawing gizmos for a LayeredGridGraph.
+		- Fixed a bug which could cause ProduralGridMover to update the graph every frame regardless
+		  of if the target moved or not (thanks Makak for finding the bug).
+		- Fixed a number of warnings in Unity 5.
+		
+- 3.5.9.7 (3.6 beta 6, 2015-01-28)
+- 3.5.9.6 (3.6 beta 5, 2015-01-28)
+- 3.5.9.5 (3.6 beta 4, 2015-01-27)
+- 3.5.9.1 (3.6 beta 3, 2014-10-14)
+- 3.5.9   (3.6 beta 2, 2014-10-13)
+- 3.5.8   (3.6 beta 1)
+	 - See release notes for 3.6
+
+- 3.5.2 (2013-09-01) (tiny bugfix and small feature release)
+	- Added isometric angle option for grid graphs to help with isometric 2D games.
+	- Fixed a bug with the RVOAgent class which caused the LightweightRVO example scene to not work as intended (no agents were avoiding each other).
+	- Fixed some documentation typos.
+	- Fixed some compilations errors some people were having with other compilers than Unity's.
+
+- 3.5.1 (2014-06-15)
+	- Added avoidance masks to local avoidance.
+		Each agent now has a layer and each agent can specify which layers it will avoid.
+
+- 3.5 (2014-06-12)
+	- Added back local avoidance!!
+		The new system uses a sampling based algorithm instead of a geometric one.
+		The API is almost exactly the same so if you used the previous system this will be a drop in replacement.
+		As for performance, it is roughly the same, maybe slightly worse in high density situations and slightly better
+		in less dense situations. It can handle several thousand agents on an i7 processor.
+		Obstacles are not yet supported, but they will be added in a future update.
+		
+	- Binary heap switched out for a 4-ary heap.
+		This improves pathfinding performances by about 5%.
+	- Optimized scanning of navmesh graphs (not the recast graphs)
+		Large meshes should be much faster to scan now.
+	- Optimized BBTree (nearest node lookup for navmesh/recast graphs, pro version only)
+		Nearest node queries on navmesh/recast graphs should be slightly faster now.
+	- Minor updates to the documentation, esp. to the GraphNode class.
+	
+- 3.4.0.7
+	- Vuforia test build
+
+- 3.4.0.6
+	- Fixed an issue where serialization could on some machines sometimes cause an exception to get thrown.
+	- Fixed an issue where the recast graph would not rasterize terrains properly near the edges of it.
+	- Added PathUtilities.BFS.
+	- Added PathUtilities.GetPointsAroundPointWorld.
+
+- 3.4.0.5
+	- Added offline documentation (Documentation.zip)
+	- Misc fixes for namespace conflicts people have been having. This should improve compatibility with other packages.
+		You might need to delete the AstarPathfindingProject folder and reimport the package for everything to work.
+
+- 3.4.0.4
+	- Removed RVOSimulatorEditor from the free version, it was causing compiler errors.
+	- Made PointGraph.nodes public.
+
+- 3.4.0.3
+	- Removed Local Avoidance due to licensing issues.
+		Agents will fall back to not avoiding each other.
+		I am working to get the local avoidance back as soon as possible.
+
+- 3.4.0.2
+	- Unity Asset Store forced me to increase version number.
+	
+- 3.4.0.1
+	- Fixed an ArrayIndexOutOfBounds exception which could be thrown by the ProceduralGridMover script in the Procedural example scene if the target was moved too quickly.
+	- The project no longer references assets from the Standard Assets folder (the package on the Unity Asset Store did so by mistake before).
+
+- 3.4
+	- Fixed a null reference exception when scanning recast graphs and rasterizing colliders.		
+	- Removed duplicate clipper_library.dll which was causing compiler errors.
+	- Support for 2D Physics collision testing when using Grid Graphs.
+	- Better warnings when using odd settings for Grid Graphs.
+	- Minor cleanups.
+	- Queued graph updates are no longer being performed when the AstarPath object is destroyed, this just took time.
+	- Fixed a bug introduced in 3.3.11 which forced grid graphs to be square in Unity versions earlier than 4.3.
+	- Fixed a null reference in BBTree ( used by RecastGraph).
+	- Fixed NavmeshGraph not rebuilding BBTree on cached start (causing performance issues on larger graphs).
+	
+	- Includes all changes from the beta releases below
+
+- Beta 3.3.14 ( available for everyone! )
+	- All dlls are now in namespaces (e.g Pathfinding.Ionic.Zip instead of just Ionic.Zip ) to avoid conflicts with other packages.
+	- Most scripts are now in namespaces to avoid conflicts with other packages.
+	- GridNodes now support custom connections.
+	- Cleanups, preparing for release.
+	- Reverted to using an Int3 for GraphNode.position instead of an abstract Position property, the tiny memory gains were not worth it.
+	
+- Beta 3.3.13 ( 4.3 compatible only )
+	- Fixed an issue where deleting a NavmeshCut component would not update the underlaying graph.
+	- Better update checking.
+	
+- Beta 3.3.12 ( 4.3 compatible only )
+	- Fixed an infinite loop which could happen when scanning graphs during runtime ( not the first scan ).
+	- NodeLink component is now working correctly.
+	- Added options for optimizations to the PointGraph.
+	- Improved TileHandler and navmesh cutting.
+	- Fixed rare bug which could mess up navmeshes when using navmesh cutting.
+	
+- Beta 3.3.11 ( 4.3 compatible only )
+	- Fixed update checking. A bug has caused update checking not to run unless you had been running a previous version in which the bug did not exist.
+		I am not sure how long this bug has been here, but potentially for a very long time.
+	- Added an update notification window which pops up when there is a new version of the A* Pathfinding Project.
+	- Lots of UI fixes for Unity 4.3
+	- Lots of other UI fixes and imprements.
+	- Fixed gravity for RichAI.
+	- Fixed Undo for Unity 4.3
+	- Added a new example scene showing a procedural environment.
+
+- Beta 3.3.10
+	- Removed RecastGraph.includeOutOfBounds.
+	- Fixed a few bugs when updating Layered Grid Graphs causing incorrect connections to be created, and valid ones to be left out.
+	- Fixed a null reference bug when removing RVO agents.
+	- Fixed memory leaks when deserializing graphs or reloading scenes.
+
+- Beta 3.3.9
+	- Added new tutorial page about recast graphs.	
+	- Recast Graph: Fixed a bug which could cause vertical surfaces to be ignored.
+	- Removed support for C++ Recast.
+	- Fixed rare bug which could mess up navmeshes when using navmesh cutting.
+	- Improved TileHandler and navmesh cutting.
+	- GraphModifiers now take O(n) (linear) time to destroy at end of game instead of O(n^2) (quadratic).
+	- RecastGraph now has a toggle for using tiles or not.
+	- Added RelevantGraphSurface which can be used with RecastGraphs to prune away non-relevant surfaces.
+	- Removed RecastGraph.accurateNearestNode since it was not used anymore.
+	- Added RecastGraph.nearestSearchOnlyXZ.
+	- RecastGraph now has support for removing small areas.
+	- Added toggle to show or hide connections between nodes on a recast graph.
+	- PointNode has some graph searching methods overloaded specially. This increases performance and reduces alloacations when searching
+		point graphs.
+	- Reduced allocations when searching on RecastGraph.
+	- Reduced allocations in RichAI and RichPath. Everything is pooled now, so for most requests no allocations will be done.
+	- Reduced allocations in general by using "yield return null" instead of "yield return 0"
+	- Fixed teleport for local avoidance agents. Previously moving an agent from one position to another
+		could cause it to interpolate between those two positions for a brief amount of time instead of staying at the second position.
+	
+- Beta 3.3.8
+	- Nicer RichAI gizmo colors.
+	- Fixed RichAI not using raycast when no path has been calculated.
+
+- Beta 3.3.7
+	- Fixed stack overflow exception in RichPath
+	- Fixed RichPath could sometimes generate invalid paths
+	- Added gizmos to RichAI
+		
+- Beta 3.3.6
+	- Fixed node positions being off by half a node size. GetNearest node queries on grid graphs would be slightly inexact.
+	- Fixed grid graph updating could get messed up when using erosion.	
+	- ... among other things, see below
+	
+- Beta 3.3.5 and 3.3.6
+	- Highlights
+		- Rewritten graph nodes. Nodes can now be created more easily (less overhead when creating nodes).
+		- Graphs may use their custom optimized memory structure for storing nodes.	
+		- Performance improvements for scanning recast graphs.
+		- Added a whole new AI script. RichAI (and the class RichPath for some things):
+			This script is intended for navmesh based graphs and has features such as:
+			- Guarantees that the character stays on the navmesh
+			- Minor deviations from the path can be fixed without a path recalculation.
+			- Very exact stop at endpoint (seriously, precision with something like 7 decimals).
+				No more circling around the target point as with AIPath.
+			- Does not use path modifiers at all (for good reasons). It has an internal funnel modifier however.
+			- Simple wall avoidance to avoid too much wall hugging.
+			- Basic support for off-mesh links (see example scene).
+		- Improved randomness for RandomPath and FleePath, all nodes considered now have an equal chance of being selected.
+		- Recast now has support for tiles. This enabled much larger worlds to be rasterized (without OutOfMemory errors) and allows for dynamic graph updates. Still slow, but much faster than
+			a complete recalculation of the graph.
+		- Navmesh Cutting can now be done on recast graphs. This is a kind of (relatively) cheap graph updating which punches a hole in the navmesh to make place for obstacles.
+			So it only supports removing geometry, not adding it (like bridges). This update is comparitively fast, and it makes real time navmesh updating possible.
+			See video: http://youtu.be/qXi5qhhGNIw.
+		- Added RecastMeshObj which can be attached to any GameObject to include that object in recast rasterization. It exposes more options and is also
+			faster for graph updates with logarithmic lookup complexity instead of linear (good for larger worlds when doing graph updating).
+		- Reintroducing special connection costs for start and end nodes.
+			Before multithreading was introduced, pathfinding on navmesh graphs could recalculate
+			the connection costs for the start and end nodes to take into account that the start point is not actually exactly at the start node's position
+			(triangles are usually quite a larger than the player/npc/whatever).
+			This didn't work with multithreading however and could mess up pathfinding, so it was removed.
+			Now it has been reintroduced, working with multithreading! This means more accurate paths
+			on navmeshes.
+		- Added several methods to pick random points (e.g for group movement) to Pathfinding.PathUtlitilies.
+		- Added RadiusModifier. A new modifier which can offset the path based on the character radius. Intended for navmesh graphs
+			which are not shrinked by the character radius at start but can be used for other purposes as well.
+		- Improved GraphUpdateScene gizmos. Convex gizmos are now correctly placed. It also shows a bounding box when selected (not showing this has confused a lot of people).
+		- AIPath has gotten some cleanups. Among other things it now behaves correctly when disabled and then enabled again
+			making it easy to pool and reuse (should that need arise).
+		- Funnel modifier on grid graphs will create wider funnels for diagonals which results in nicer paths.
+		- If an exception is thrown during pathfinding, the program does no longer hang at quit.
+		- Split Automatic thread count into Automatic High Load and Automatic Low Load. The former one using a higher number of thread.
+		- Thread count used is now shown in the editor.
+		- GridGraph now supports ClosestOnNode (StartEndModifier) properly. SnapToNode gives the previous behaviour on GridGraphs (they were identical before).
+		- New example scene Door2 which uses the NavmeshCut component.
+	- Fixes
+		- Fixed spelling error in GridGraph.uniformWidthDepthGrid.
+		- Erosion radius (character radius, recast graphs) could become half of what it really should be in many cases.
+		- RecastGraph will not rasterize triggers.
+		- Fixed recast not being able to handle multiple terrains.
+		- Fixed recast generating an incorrect mesh for terrains in some cases (not the whole terrain was included).
+		- Linecast on many graph types had incorrect descriptions saying that the function returns true when the line does not intersect any obstacles,
+			it is actually the other way around. Descriptions corrected.
+		- The list of nodes returned by a ConstantPath is now guaranteed to have no duplicates.
+		- Many recast constants are now proper constants instead of static variables.
+		- Fixed bug in GridNode.RemoveGridGraph which caused graphs not being cleaned up correctly. Could cause problems later on.
+		- Fixed an ArgumentOutOfRange exception in ListPool class.
+		- RelocateNodes on NavMeshGraph now correctly recalculates connection costs and rebuilds the internal query tree (thanks peted on the forums).
+		- Much better member documentation for RVOController.
+		- Exposed MaxNeighbours from IAgent to RVOController.
+		- Fixed AstarData.UpdateShortcuts not being called when caching was enabled. This caused graph shortcuts such as AstarPath.astarData.gridGraph not being set
+			when loaded from a cache.
+		- RVOCoreSimulator/RVOSimulator now cleans up the worker threads correctly.
+		- Tiled recast graphs can now be serialized.
+	- Changes
+		- Renamed Modifier class to PathModifier to avoid naming conflicts with user scripts and other packages.
+		- Cleaned up recast, put inside namespace and split into multiple files.
+		- ListPool and friends are now threadsafe.
+		- Removed Polygon.Dot since the Vector3 class already contains such a method.
+		- The Scan functions now use callbacks for progress info instead of IEnumerators. Graphs can now output progress info as well.
+		- Added Pathfinding.NavGraph.CountNodes function.
+		- Removed GraphHitInfo.success field since it was not used.
+		- GraphUpdateScene will now fall back to collider.bounds or renderer.bounds (depending on what is available) if no points are
+			defined for the shape.
+		- AstarPath.StartPath now has an option to put the path in the front of the queue to prioritize its calculation over other paths.
+		- Time.fixedDeltaTime by Time.deltaTime in AIPath.RotateTowards() to work with both FixedUpdate and Update. (Thanks Pat_AfterMoon)
+			You might have to configure the turn speed variable after updating since the actual rotation speed might have changed a bit depending on your settings.
+		- Fixed maxNeighbourDistance not being used correctly by the RVOController script. It would stay at the default value. If you
+			have had trouble getting local avoidance working on world with a large scale, this could have been the problem. (Thanks to Edgar Sun for providing a reproducible example case)
+		- Graphs loaded using DeserializeGraphsAdditive will get their graphIndex variables on the nodes set to the correct values. (thanks peted for noticing the bug).
+		- Fixed a null reference exception in MultiTargetPath (thanks Dave for informing me about the bug).
+		- GraphUpdateScene.useWorldSpace is now false per default.
+		- If no log output is disabled and we are not running in the editor, log output will be discarded as early as possible for performance.
+			Even though in theory log output could be enabled between writing to internal log strings and deciding if log output should be written.
+		- NavGraph.inverseMatrix is now a field, not a property (for performance). All writes to matrix should be through the SetMatrix method.
+		- StartEndModifier now uses ClosestOnNode for both startPoint and endPoint by default.
+	- Known bugs
+		- Linecasting on graphs is broken at the moment. (working for recast/navmesh graph atm. Except in very special cases)
+		- RVONavmesh does not work with tiled recast graphs.
+
+		
 
 - 3.2.5.1
 	- Fixes
@@ -21,8 +339,8 @@
 			was destroyed.
 		- When using a non-positive maxDistance for point graphs less processing power will be used.
 		- Removed unused 'recyclePaths' variable in the AIPath class.
-		- NullReferenceException could ocurr if the Pathfinding.Node.connections array was null.
-		- Fixed NullReferenceException which could ocurr sometimes when using a MultiTargetPath (Issue #16)
+		- NullReferenceException could occur if the Pathfinding.Node.connections array was null.
+		- Fixed NullReferenceException which could occur sometimes when using a MultiTargetPath (Issue #16)
 		- Changed Ctrl to Alt when recalcing path continously in the Path Types example scene to avoid
 			clearing the points for the MultiTargetPath at the same time (it was also using Ctrl).
 		- Fixed strange looking movement artifacts during the first few frames when using RVO and interpolation was enabled.
@@ -32,6 +350,7 @@
 			updating graphs.
 		- Fixed a bug which could cause pathfinding to crash if using the preprocessor directive ASTAR_NoTagPenalty.
 		- Fixed a case where StartEndModifier.exactEndPoint would incorrectly be used instead of exactStartPoint.
+		- AlternativePath modifier now correctly resets penalties if it is destroyed.
 		
 - 3.2.4.1
 	- Unity Asset Store guys complained about the wrong key image.
@@ -284,7 +603,7 @@
 	- Reverted back to manually setting the dark skin option, since it didn't work in all cases, however if a dark skin is detected, the user will be asked if he/she wants to enable the dark skin
 	- Added gizmos for the AIFollow script which shows the current waypoint and a circle around it illustrating the distance required for it to be considered "reached".
 	- The C# version of Recast does now use Character Radius instead of Erosion Radius (world units instead of voxels)
-	- Fixed an IndexOutOfRange exception which could ocurr when saving a graph with no nodes to file
+	- Fixed an IndexOutOfRange exception which could occur when saving a graph with no nodes to file
 	- <b>Known Bugs:</b> The C++ version of Recast does not work on Windows
 - 3.0.6
 	- Added support for a C++ version of Recast which means faster scanning times and more features (though almost no are available at the moment since I haven't added support for them yet).
@@ -302,7 +621,7 @@
 	- List Graphs can now gather nodes based on GameObject tags instead of all nodes as childs of a specific GameObject.
 	- List Graphs can now search recursively for childs to the 'root' GameObject instead of just searching through the top-level children.
 	- Added custom area colors which can be edited in the inspector (A* inspector --> Settings --> Color Settings --> Custom Area Colors)
-	- Fixed a NullReference bug which could ocurr when loading a Unity Reference with the AstarSerializer.
+	- Fixed a NullReference bug which could occur when loading a Unity Reference with the AstarSerializer.
 	- Fixed some bugs with the FleePath and RandomPath which could cause the StartEndModifier to assign the wrong endpoint to the path.
 	- Documentation is now more clear on what is A* Pathfinding Project Pro only features.
 	- Pathfinding.NNConstraint now has a variable to constrain which graphs to search (A* Pro only).\n

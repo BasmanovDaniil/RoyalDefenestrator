@@ -7,7 +7,7 @@ public class ObjectPlacer : MonoBehaviour {
 	
 	public GameObject go; /** GameObject to place. Make sure the layer it is in is included in the collision mask on the GridGraph settings (assuming a GridGraph) */
 	public bool direct = false; /** Flush Graph Updates directly after placing. Slower, but updates are applied immidiately */
-	
+	public bool issueGUOs = true; /** Issue a graph update object after placement */
 	void Start () {
 	}
 	
@@ -31,13 +31,15 @@ public class ObjectPlacer : MonoBehaviour {
 			
 			GameObject obj = (GameObject)GameObject.Instantiate (go,p,Quaternion.identity);
 			
-			Bounds b = obj.collider.bounds;
-			//Pathfinding.Console.Write ("// Placing Object\n");
-			GraphUpdateObject guo = new GraphUpdateObject(b);
-			AstarPath.active.UpdateGraphs (guo);
-			if (direct) {
-				//Pathfinding.Console.Write ("// Flushing\n");
-				AstarPath.active.FlushGraphUpdates();
+			if (issueGUOs) {
+				Bounds b = obj.GetComponent<Collider>().bounds;
+				//Pathfinding.Console.Write ("// Placing Object\n");
+				GraphUpdateObject guo = new GraphUpdateObject(b);
+				AstarPath.active.UpdateGraphs (guo);
+				if (direct) {
+					//Pathfinding.Console.Write ("// Flushing\n");
+					AstarPath.active.FlushGraphUpdates();
+				}
 			}
 		}
 	}
@@ -53,11 +55,13 @@ public class ObjectPlacer : MonoBehaviour {
 			Destroy (hit.collider.gameObject);
 			
 			//Pathfinding.Console.Write ("// Placing Object\n");
-			GraphUpdateObject guo = new GraphUpdateObject(b);
-			AstarPath.active.UpdateGraphs (guo,0.0f);
-			if (direct) {
-				//Pathfinding.Console.Write ("// Flushing\n");
-				AstarPath.active.FlushGraphUpdates();
+			if (issueGUOs) {
+				GraphUpdateObject guo = new GraphUpdateObject(b);
+				AstarPath.active.UpdateGraphs (guo,0.0f);
+				if (direct) {
+					//Pathfinding.Console.Write ("// Flushing\n");
+					AstarPath.active.FlushGraphUpdates();
+				}
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 7fdfb9a3e0fdf4df880ebc7fa5f56398
 ModelImporter:
-  serializedVersion: 15
+  serializedVersion: 18
   fileIDToRecycleName:
     100000: //RootNode
     400000: //RootNode
@@ -17,13 +17,16 @@ ModelImporter:
     materialName: 3
     materialSearch: 1
   animations:
-    legacyGenerateAnimations: 4
+    legacyGenerateAnimations: 3
     bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
     animationCompression: 1
     animationRotationError: .5
     animationPositionError: .5
     animationScaleError: .5
     animationWrapMode: 0
+    extraExposedTransformPaths: []
     clipAnimations: []
     isReadable: 1
   meshes:
@@ -36,11 +39,13 @@ ModelImporter:
     generateSecondaryUV: 1
     useFileUnits: 1
     optimizeMeshForGPU: 1
+    keepQuads: 0
     weldVertices: 1
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
+    useFileScale: 0
   tangentSpace:
     normalSmoothAngle: 60
     splitTangentsAcrossUV: 1
@@ -51,7 +56,6 @@ ModelImporter:
   humanDescription:
     human: []
     skeleton: []
-    handles: []
     armTwist: .5
     foreArmTwist: .5
     upperLegTwist: .5
@@ -61,6 +65,8 @@ ModelImporter:
     feetSpacing: 0
     rootMotionBoneName: 
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  additionalBone: 1
   animationType: 1
+  additionalBone: 0
   userData: 
+  assetBundleName: 
+  assetBundleVariant: 

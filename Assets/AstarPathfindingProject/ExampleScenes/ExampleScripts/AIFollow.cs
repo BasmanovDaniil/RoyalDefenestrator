@@ -3,9 +3,10 @@ using System.Collections;
 using Pathfinding;
 
 /** Example AI.
- * \deprecated This script has been deprecated, use AIPath or MineBotAI instead */
+ * \deprecated This script has been deprecated, use AIPath, RichAI or MineBotAI instead */
 [RequireComponent (typeof(Seeker))]
 [RequireComponent (typeof(CharacterController))]
+[AddComponentMenu("Pathfinding/AI/AIFollow (deprecated)")]
 public class AIFollow : MonoBehaviour {
 	
 	/** Target to move to */
@@ -96,7 +97,7 @@ public class AIFollow : MonoBehaviour {
 		int notCloserHits = 0;
 		
 		for (int i=0;i<path.Length-1;i++) {
-			float dist = Mathfx.DistancePointSegmentStrict (path[i],path[i+1],tr.position);
+			float dist = AstarMath.DistancePointSegmentStrict (path[i],path[i+1],tr.position);
 			if (dist < minDist) {
 				notCloserHits = 0;
 				minDist = dist;
@@ -231,7 +232,6 @@ public class AIFollow : MonoBehaviour {
 		forwardDir *= Mathf.Clamp01 (Vector3.Dot (dir.normalized, tr.forward));
 		
 		if (navmeshController != null) {
-			navmeshController.SimpleMove (tr.position,forwardDir);
 		} else if (controller != null) {
 			controller.SimpleMove (forwardDir);
 		} else {

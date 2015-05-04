@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Pathfinding;
+using Pathfinding.RVO;
 
 /** AI for following paths.
  * This AI is the default movement script which comes with the A* Pathfinding Project.
@@ -33,6 +34,7 @@ using Pathfinding;
  * it will use Transform.Translate which is guaranteed to always work.
  */
 [RequireComponent(typeof(Seeker))]
+[AddComponentMenu("Pathfinding/AI/AIPath (generic)")]
 public class AIPath : MonoBehaviour {
 	
 	/** Determines how often it will search for new paths. 
@@ -103,7 +105,7 @@ public class AIPath : MonoBehaviour {
 	protected Transform tr;
 	
 	/** Time when the last path request was sent */
-	private float lastRepath = -9999;
+	protected float lastRepath = -9999;
 	
 	/** Current path which is followed */
 	protected Path path;
@@ -127,7 +129,10 @@ public class AIPath : MonoBehaviour {
 	
 	/** Only when the previous path has been returned should be search for a new path */
 	protected bool canSearchAgain = true;
-	
+
+	protected Vector3 lastFoundWaypointPosition;
+	protected float lastFoundWaypointTime = -9999;
+
 	/** Returns if the end-of-path has been reached
 	 * \see targetReached */
 	public bool TargetReached {
@@ -151,13 +156,10 @@ public class AIPath : MonoBehaviour {
 		//This is a simple optimization, cache the transform component lookup
 		tr = transform;
 		
-		//Make sure we receive callbacks when paths complete
-		seeker.pathCallback += OnPathComplete;
-		
 		//Cache some other components (not all are necessarily there)
 		controller = GetComponent<CharacterController>();
 		navController = GetComponent<NavmeshController>();
-		rigid = rigidbody;
+		rigid = GetComponent<Rigidbody>();
 	}
 	
 	/** Starts searching for paths.
@@ -176,56 +178,63 @@ public class AIPath : MonoBehaviour {
 	 * \see Start
 	 */
 	protected virtual void OnEnable () {
-		if (startHasRun) StartCoroutine (RepeatTrySearchPath ());
+		
+		lastRepath = -9999;
+		canSearchAgain = true;
+
+		lastFoundWaypointPosition = GetFeetPosition ();
+
+		if (startHasRun) {
+			//Make sure we receive callbacks when paths complete
+			seeker.pathCallback += OnPathComplete;
+			
+			StartCoroutine (RepeatTrySearchPath ());
+		}
+	}
+	
+	public void OnDisable () {
+		// Abort calculation of path
+		if (seeker != null && !seeker.IsDone()) seeker.GetCurrentPath().Error();
+		
+		// Release current path
+		if (path != null) path.Release (this);
+		path = null;
+		
+		//Make sure we receive callbacks when paths complete
+		seeker.pathCallback -= OnPathComplete;
 	}
 	
 	/** Tries to search for a path every #repathRate seconds.
 	  * \see TrySearchPath
 	  */
-	public IEnumerator RepeatTrySearchPath () {
+	protected IEnumerator RepeatTrySearchPath () {
 		while (true) {
-			TrySearchPath ();
-			yield return new WaitForSeconds (repathRate);
+			float v = TrySearchPath ();
+			yield return new WaitForSeconds (v);
 		}
 	}
 	
 	/** Tries to search for a path.
 	 * Will search for a new path if there was a sufficient time since the last repath and both
-	 * #canSearchAgain and #canSearch are true.
-	 * Otherwise will start WaitForPath function.
+	 * #canSearchAgain and #canSearch are true and there is a target.
+	 * 
+	 * \returns The time to wait until calling this function again (based on #repathRate) 
 	 */
-	public void TrySearchPath () {
-		if (Time.time - lastRepath >= repathRate && canSearchAgain && canSearch) {
+	public float TrySearchPath () {
+		if (Time.time - lastRepath >= repathRate && canSearchAgain && canSearch && target != null) {
 			SearchPath ();
+			return repathRate;
 		} else {
-			StartCoroutine (WaitForRepath ());
+			//StartCoroutine (WaitForRepath ());
+			float v = repathRate - (Time.time-lastRepath);
+			return v < 0 ? 0 : v;
 		}
-	}
-	
-	/** Is WaitForRepath running */
-	private bool waitingForRepath = false;
-	
-	/** Wait a short time til Time.time-lastRepath >= repathRate.
-	  * Then call TrySearchPath
-	  * 
-	  * \see TrySearchPath
-	  */
-	protected IEnumerator WaitForRepath () {
-		if (waitingForRepath) yield break; //A coroutine is already running
-		
-		waitingForRepath = true;
-		//Wait until it is predicted that the AI should search for a path again
-		yield return new WaitForSeconds (repathRate - (Time.time-lastRepath));
-		
-		waitingForRepath = false;
-		//Try to search for a path again
-		TrySearchPath ();
 	}
 	
 	/** Requests a path to the target */
 	public virtual void SearchPath () {
 		
-		if (target == null) { Debug.LogError ("Target is null, aborting all search"); canSearch = false; return; }
+		if (target == null) throw new System.InvalidOperationException ("Target is null");
 		
 		lastRepath = Time.time;
 		//This is where we should search to
@@ -234,7 +243,7 @@ public class AIPath : MonoBehaviour {
 		canSearchAgain = false;
 		
 		//Alternative way of requesting the path
-		//Path p = PathPool<Path>.GetPath().Setup(GetFeetPosition(),targetPoint,null);
+		//ABPath p = ABPath.Construct (GetFeetPosition(),targetPoint,null);
 		//seeker.StartPath (p);
 		
 		//We should search from the current position
@@ -249,10 +258,6 @@ public class AIPath : MonoBehaviour {
 		//and override the function in that script
 	}
 	
-	public void OnDestroy () {
-		if (path != null) path.Release (this);
-	}
-	
 	/** Called when a requested path has finished calculation.
 	  * A path is first requested by #SearchPath, it is then calculated, probably in the same or the next frame.
 	  * Finally it is returned to the seeker which forwards it to this function.\n
@@ -261,11 +266,20 @@ public class AIPath : MonoBehaviour {
 		ABPath p = _p as ABPath;
 		if (p == null) throw new System.Exception ("This function only handles ABPaths, do not use special path types");
 		
-		//Release the previous path
-		if (path != null) path.Release (this);
+		canSearchAgain = true;
 		
 		//Claim the new path
 		p.Claim (this);
+		
+		// Path couldn't be calculated of some reason.
+		// More info in p.errorLog (debug string)
+		if (p.error) {
+			p.Release (this);
+			return;
+		}
+		
+		//Release the previous path
+		if (path != null) path.Release (this);
 		
 		//Replace the old path
 		path = p;
@@ -273,7 +287,6 @@ public class AIPath : MonoBehaviour {
 		//Reset some variables
 		currentWaypointIndex = 0;
 		targetReached = false;
-		canSearchAgain = true;
 		
 		//The next row can be used to find out if the path could be found or not
 		//If it couldn't (error == true), then a message has probably been logged to the console
@@ -281,16 +294,19 @@ public class AIPath : MonoBehaviour {
 		//if (p.error)
 		
 		if (closestOnPathCheck) {
-			Vector3 p1 = p.startPoint;
+			Vector3 p1 = Time.time - lastFoundWaypointTime < 0.3f ? lastFoundWaypointPosition : p.originalStartPoint;
 			Vector3 p2 = GetFeetPosition ();
-			float magn = Vector3.Distance (p1,p2);
 			Vector3 dir = p2-p1;
+			float magn = dir.magnitude;
 			dir /= magn;
 			int steps = (int)(magn/pickNextWaypointDist);
-			for (int i=0;i<steps;i++) {
+
+
+			for (int i=0;i<=steps;i++) {
 				CalculateVelocity (p1);
 				p1 += dir;
 			}
+
 		}
 	}
 	
@@ -307,14 +323,11 @@ public class AIPath : MonoBehaviour {
 		if (!canMove) { return; }
 		
 		Vector3 dir = CalculateVelocity (GetFeetPosition());
-		
+
 		//Rotate towards targetDirection (filled in by CalculateVelocity)
-		if (targetDirection != Vector3.zero) {
-			RotateTowards (targetDirection);
-		}
+		RotateTowards (targetDirection);
 	
 		if (navController != null) {
-			navController.SimpleMove (GetFeetPosition(),dir);
 		} else if (controller != null) {
 			controller.SimpleMove (dir);
 		} else if (rigid != null) {
@@ -353,7 +366,6 @@ public class AIPath : MonoBehaviour {
 		if (path == null || path.vectorPath == null || path.vectorPath.Count == 0) return Vector3.zero; 
 		
 		List<Vector3> vPath = path.vectorPath;
-		//Vector3 currentPosition = GetFeetPosition();
 		
 		if (vPath.Count == 1) {
 			vPath.Insert (0,currentPosition);
@@ -369,6 +381,8 @@ public class AIPath : MonoBehaviour {
 				float dist = XZSqrMagnitude (vPath[currentWaypointIndex], currentPosition);
 					//Mathfx.DistancePointSegmentStrict (vPath[currentWaypointIndex+1],vPath[currentWaypointIndex+2],currentPosition);
 				if (dist < pickNextWaypointDist*pickNextWaypointDist) {
+					lastFoundWaypointPosition = currentPosition;
+					lastFoundWaypointTime = Time.time;
 					currentWaypointIndex++;
 				} else {
 					break;
@@ -380,9 +394,7 @@ public class AIPath : MonoBehaviour {
 		
 		Vector3 dir = vPath[currentWaypointIndex] - vPath[currentWaypointIndex-1];
 		Vector3 targetPosition = CalculateTargetPoint (currentPosition,vPath[currentWaypointIndex-1] , vPath[currentWaypointIndex]);
-			//vPath[currentWaypointIndex] + Vector3.ClampMagnitude (dir,forwardLook);
-		
-		
+
 		
 		dir = targetPosition-currentPosition;
 		dir.y = 0;
@@ -416,10 +428,13 @@ public class AIPath : MonoBehaviour {
 	 * \see turningSpeed
 	 */
 	protected virtual void RotateTowards (Vector3 dir) {
+		
+		if (dir == Vector3.zero) return;
+		
 		Quaternion rot = tr.rotation;
 		Quaternion toTarget = Quaternion.LookRotation (dir);
 		
-		rot = Quaternion.Slerp (rot,toTarget,turningSpeed*Time.fixedDeltaTime);
+		rot = Quaternion.Slerp (rot,toTarget,turningSpeed*Time.deltaTime);
 		Vector3 euler = rot.eulerAngles;
 		euler.z = 0;
 		euler.x = 0;
@@ -443,7 +458,7 @@ public class AIPath : MonoBehaviour {
 		float magn = (a-b).magnitude;
 		if (magn == 0) return a;
 		
-		float closest = Mathfx.Clamp01 (Mathfx.NearestPointFactor (a, b, p));
+		float closest = AstarMath.Clamp01 (AstarMath.NearestPointFactor (a, b, p));
 		Vector3 point = (b-a)*closest + a;
 		float distance = (point-p).magnitude;
 		
