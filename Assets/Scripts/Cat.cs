@@ -23,7 +23,7 @@ public class Cat : MonoBehaviour
     void Start ()
 	{
 	    tr = transform;
-        rb = rigidbody;
+        rb = GetComponent<Rigidbody>();
 
         random = new System.Random();
         panicList = new[] { "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "HEY YOU! PUT ME DOWN!" };

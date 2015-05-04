@@ -49,7 +49,7 @@ public class Queen : MonoBehaviour
         panicList = new[] { "Alarm!", "Guards!", "Help me!", "Aaaaah!", "Whyyyyy?", "Don't throw meeee!", "Put me down!", "Please! Nooo!" };
         okList = new[] { "OK, never mind", "*AHEM*", "Fine, lets go", "...", "Whatever" };
         tr = transform;
-	    rb = rigidbody;
+	    rb = GetComponent<Rigidbody>();
         seeker = GetComponent<Seeker>();
 
         seeker.pathCallback += OnPathComplete;

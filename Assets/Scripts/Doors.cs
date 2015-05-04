@@ -10,13 +10,13 @@ public class Doors : MonoBehaviour
 	{
         leftDoor.position -= leftDoor.right * 3;
         rightDoor.position += rightDoor.right * 3;
-        audio.Play();
+        GetComponent<AudioSource>().Play();
 	}
 
     public void Close()
     {
         leftDoor.position += leftDoor.right * 3;
         rightDoor.position -= rightDoor.right * 3;
-        audio.Play();
+        GetComponent<AudioSource>().Play();
     }
 }

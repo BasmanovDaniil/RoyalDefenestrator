@@ -13,6 +13,6 @@ public class Vortex : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        other.rigidbody.AddForce(-tr.forward * force);
+        other.GetComponent<Rigidbody>().AddForce(-tr.forward * force);
     }
 }

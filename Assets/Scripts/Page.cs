@@ -21,7 +21,7 @@ public class Page : MonoBehaviour
 	void Start ()
 	{
 	    tr = transform;
-	    rb = rigidbody;
+	    rb = GetComponent<Rigidbody>();
 	}
 
     void Update()
@@ -52,7 +52,7 @@ public class Page : MonoBehaviour
                         if (character.tag != "Page")
                         {
                             isCharacter = true;
-                            item = character.rigidbody;
+                            item = character.GetComponent<Rigidbody>();
                             item.useGravity = false;
                             item.isKinematic = true;
                             item.drag = 0;
@@ -80,7 +80,7 @@ public class Page : MonoBehaviour
                 else if (throwables.Length > 0)
                 {
                     isCharacter = false;
-                    item = throwables[0].rigidbody;
+                    item = throwables[0].GetComponent<Rigidbody>();
                     item.useGravity = false;
                     item.isKinematic = true;
                 }

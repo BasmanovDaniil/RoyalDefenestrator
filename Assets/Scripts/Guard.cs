@@ -45,7 +45,7 @@ public class Guard : MonoBehaviour
     void Start()
     {
         tr = transform;
-        rb = rigidbody;
+        rb = GetComponent<Rigidbody>();
         seeker = GetComponent<Seeker>();
 
         random = new System.Random((int) tr.position.x);
@@ -107,9 +107,9 @@ public class Guard : MonoBehaviour
                     throwables = Physics.OverlapSphere(tr.position + tr.forward, 2, characterLayer);
                     foreach (var throwable in throwables)
                     {
-                        if (throwable.rigidbody.tag == "Page")
+                        if (throwable.GetComponent<Rigidbody>().tag == "Page")
                         {
-                            item = throwable.rigidbody;
+                            item = throwable.GetComponent<Rigidbody>();
                             item.useGravity = false;
                             item.isKinematic = true;
                             item.GetComponent<Page>().grabbed = true;
