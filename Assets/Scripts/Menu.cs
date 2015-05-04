@@ -6,12 +6,12 @@ public class Menu : MonoBehaviour
 
     private TextMesh text;
 
-	void Start ()
-	{
-	    text = GetComponent<TextMesh>();
-	}
+    private void Start()
+    {
+        text = GetComponent<TextMesh>();
+    }
 
-    void OnMouseDown()
+    private void OnMouseDown()
     {
         if (text.text == "Resume")
         {

@@ -7,20 +7,20 @@ public class Trigger : MonoBehaviour
     private bool working = true;
     private System.Random random;
 
-    void Start()
+    private void Start()
     {
         random = new System.Random();
     }
-	
-	void OnTriggerEnter (Collider other)
-	{
-	    if (!working) return;
-	    if (other.tag == "Queen")
-	    {
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!working) return;
+        if (other.tag == "Queen")
+        {
             var victim = victimList[random.Next(victimList.Length)];
             victim.tag = "Victim";
             other.GetComponent<Queen>().SetVictim(victim);
-	        working = false;
-	    }
-	}
+            working = false;
+        }
+    }
 }

@@ -6,7 +6,7 @@ public class Cat : MonoBehaviour
     public int radius = 7;
     public LayerMask characterLayer;
     public bool grounded;
-    
+
     public SpeechBubble speechBubble;
     public Transform target;
     public Transform head;
@@ -20,23 +20,27 @@ public class Cat : MonoBehaviour
     private Vector3 newForward;
     private Vector3 toTarget;
 
-    void Start ()
-	{
-	    tr = transform;
+    private void Start()
+    {
+        tr = transform;
         rb = GetComponent<Rigidbody>();
 
         random = new System.Random();
-        panicList = new[] { "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "HEY YOU! PUT ME DOWN!" };
+        panicList = new[]
+        {
+            "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr", "Mew", "Purrr",
+            "HEY YOU! PUT ME DOWN!"
+        };
         purrList = new[] {"Mew", "Purrr"};
         StartCoroutine(Purr());
-	}
+    }
 
     public IEnumerator Panic()
     {
         yield return new WaitForSeconds(1);
         while (!grounded)
         {
-            random = new System.Random((int)tr.position.x);
+            random = new System.Random((int) tr.position.x);
             speechBubble.SetText(panicList[random.Next(panicList.Length)]);
             yield return new WaitForSeconds(3);
             speechBubble.SetText("");
@@ -50,7 +54,7 @@ public class Cat : MonoBehaviour
         {
             if (grounded)
             {
-                random = new System.Random((int)tr.position.x);
+                random = new System.Random((int) tr.position.x);
                 speechBubble.SetText(purrList[random.Next(purrList.Length)]);
                 yield return new WaitForSeconds(3);
                 speechBubble.SetText("");
@@ -59,13 +63,13 @@ public class Cat : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         if (!grounded) return;
         newForward = tr.forward;
 
         characters = Physics.OverlapSphere(tr.position, radius, characterLayer);
-        if(characters.Length > 1)
+        if (characters.Length > 1)
         {
             foreach (var character in characters)
             {
@@ -81,7 +85,7 @@ public class Cat : MonoBehaviour
             toTarget = target.position - head.position;
             if (Vector3.Angle(head.forward, toTarget) > 3)
             {
-                head.forward = Vector3.Slerp(head.forward, toTarget, 10 * Time.deltaTime);
+                head.forward = Vector3.Slerp(head.forward, toTarget, 10*Time.deltaTime);
             }
             if (Vector3.Angle(tr.forward, toTarget) > 45)
             {
@@ -96,18 +100,19 @@ public class Cat : MonoBehaviour
         {
             if (Vector3.Angle(head.forward, tr.forward) > 3)
             {
-                head.forward = Vector3.Slerp(head.forward, tr.forward, 10 * Time.deltaTime);
+                head.forward = Vector3.Slerp(head.forward, tr.forward, 10*Time.deltaTime);
             }
         }
 
         newForward.y = 0;
         if (newForward != tr.forward || tr.up != Vector3.up)
         {
-            tr.rotation = Quaternion.Slerp(tr.rotation, Quaternion.LookRotation(newForward, Vector3.up), 5 * Time.deltaTime);
+            tr.rotation = Quaternion.Slerp(tr.rotation, Quaternion.LookRotation(newForward, Vector3.up),
+                5*Time.deltaTime);
         }
     }
 
-    void OnCollisionStay(Collision collision)
+    private void OnCollisionStay(Collision collision)
     {
         if (collision.gameObject.tag == "Floor")
         {

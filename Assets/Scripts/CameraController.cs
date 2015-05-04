@@ -8,18 +8,18 @@ public class CameraController : MonoBehaviour
 
     private Transform tr;
     private Vector3 initialPosition;
-	
-	void Start ()
-	{
-	    tr = transform;
-	}
-	
-	void LateUpdate ()
+
+    private void Start()
+    {
+        tr = transform;
+    }
+
+    private void LateUpdate()
     {
         if (target != null)
         {
             tr.position = target.position + cameraPosition;
             tr.rotation = Quaternion.Euler(cameraRotation);
         }
-	}
+    }
 }

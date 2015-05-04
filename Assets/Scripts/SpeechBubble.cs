@@ -11,23 +11,23 @@ public class SpeechBubble : MonoBehaviour
     private Vector3 point;
     private Vector3 newPosition;
 
-	void Start ()
-	{
-	    tr = transform;
-	}
-	
-	void Update ()
-	{
-	    if (target == null || camTransform == null) return;
-	    if (front.text == "") return;
+    private void Awake()
+    {
+        tr = transform;
+    }
+
+    private void Update()
+    {
+        if (target == null || camTransform == null) return;
+        if (front.text == "") return;
         tr.position = target.position + Vector3.up*4;
         tr.rotation = Quaternion.LookRotation(tr.position - camTransform.position, Vector3.up);
-	}
+    }
 
     public void SetText(string text)
     {
         if (target == null || camTransform == null) return;
-        tr.position = target.position + Vector3.up * 4;
+        tr.position = target.position + Vector3.up*4;
         tr.rotation = Quaternion.LookRotation(tr.position - camTransform.position, Vector3.up);
         back.text = text;
         front.text = text;

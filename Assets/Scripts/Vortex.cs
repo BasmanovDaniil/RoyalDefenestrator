@@ -6,13 +6,13 @@ public class Vortex : MonoBehaviour
 
     private Transform tr;
 
-	void Start ()
-	{
-	    tr = transform;
-	}
-
-    void OnTriggerStay(Collider other)
+    private void Start()
     {
-        other.GetComponent<Rigidbody>().AddForce(-tr.forward * force);
+        tr = transform;
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        other.GetComponent<Rigidbody>().AddForce(-tr.forward*force);
     }
 }

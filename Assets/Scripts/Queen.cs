@@ -2,7 +2,7 @@ using Pathfinding;
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(Seeker))]
+[RequireComponent(typeof (Seeker))]
 public class Queen : MonoBehaviour
 {
     public Transform[] targetList;
@@ -43,13 +43,14 @@ public class Queen : MonoBehaviour
     private Vector3 newForward;
     private Vector3 toTarget;
 
-	void Start ()
+    private void Start()
     {
         random = new System.Random();
-        panicList = new[] { "Alarm!", "Guards!", "Help me!", "Aaaaah!", "Whyyyyy?", "Don't throw meeee!", "Put me down!", "Please! Nooo!" };
-        okList = new[] { "OK, never mind", "*AHEM*", "Fine, lets go", "...", "Whatever" };
+        panicList = new[]
+        {"Alarm!", "Guards!", "Help me!", "Aaaaah!", "Whyyyyy?", "Don't throw meeee!", "Put me down!", "Please! Nooo!"};
+        okList = new[] {"OK, never mind", "*AHEM*", "Fine, lets go", "...", "Whatever"};
         tr = transform;
-	    rb = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
         seeker = GetComponent<Seeker>();
 
         seeker.pathCallback += OnPathComplete;
@@ -58,23 +59,23 @@ public class Queen : MonoBehaviour
         {
             SetTarget(targetList[0]);
         }
-	    StartCoroutine(UpdatePath());
+        StartCoroutine(UpdatePath());
     }
 
-    void Update()
+    private void Update()
     {
         Debug.DrawRay(tr.position, (cat.position - tr.position).normalized*15, Color.red);
     }
 
-	void FixedUpdate ()
-	{
+    private void FixedUpdate()
+    {
         if (!grounded) return;
         newForward = tr.forward;
 
-	    if (walking)
-	    {
+        if (walking)
+        {
             if (path == null) return;
-            if ((path.vectorPath[path.vectorPath.Count - 1] - tr.position).sqrMagnitude > targetDistance * targetDistance)
+            if ((path.vectorPath[path.vectorPath.Count - 1] - tr.position).sqrMagnitude > targetDistance*targetDistance)
             {
                 direction = path.vectorPath[currentWaypoint] - tr.position;
                 direction.y = 0;
@@ -83,9 +84,10 @@ public class Queen : MonoBehaviour
                 {
                     newForward += direction.normalized;
                 }
-                rb.AddForce(direction.normalized * moveSpeed * Time.deltaTime);
+                rb.AddForce(direction.normalized*moveSpeed*Time.deltaTime);
 
-                if ((tr.position - path.vectorPath[currentWaypoint]).sqrMagnitude < nextWaypointDistance * nextWaypointDistance && currentWaypoint < path.vectorPath.Count - 1)
+                if ((tr.position - path.vectorPath[currentWaypoint]).sqrMagnitude <
+                    nextWaypointDistance*nextWaypointDistance && currentWaypoint < path.vectorPath.Count - 1)
                 {
                     currentWaypoint++;
                 }
@@ -101,14 +103,14 @@ public class Queen : MonoBehaviour
                     SetTarget(targetList[currentTarget]);
                 }
             }
-	    }
+        }
 
         if (target != null)
         {
             toTarget = target.position - head.position;
             if (Vector3.Angle(head.forward, toTarget) > 3)
             {
-                head.forward = Vector3.Slerp(head.forward, toTarget, 10 * Time.deltaTime);
+                head.forward = Vector3.Slerp(head.forward, toTarget, 10*Time.deltaTime);
             }
             if (Vector3.Angle(tr.forward, toTarget) > 45)
             {
@@ -119,16 +121,17 @@ public class Queen : MonoBehaviour
         {
             if (Vector3.Angle(head.forward, tr.forward) > 3)
             {
-                head.forward = Vector3.Slerp(head.forward, tr.forward, 10 * Time.deltaTime);
+                head.forward = Vector3.Slerp(head.forward, tr.forward, 10*Time.deltaTime);
             }
         }
 
         newForward.y = 0;
         if (newForward != tr.forward || tr.up != Vector3.up)
         {
-            tr.rotation = Quaternion.Slerp(tr.rotation, Quaternion.LookRotation(newForward, Vector3.up), 5 * Time.deltaTime);
+            tr.rotation = Quaternion.Slerp(tr.rotation, Quaternion.LookRotation(newForward, Vector3.up),
+                5*Time.deltaTime);
         }
-	}
+    }
 
     public void SetTarget(Vector3 targetPoint)
     {
@@ -140,7 +143,7 @@ public class Queen : MonoBehaviour
         SetTarget(targetTransform.position);
     }
 
-    void OnPathComplete(Path p)
+    private void OnPathComplete(Path p)
     {
         if (!p.error)
         {
@@ -153,7 +156,7 @@ public class Queen : MonoBehaviour
         }
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         seeker.pathCallback -= OnPathComplete;
     }
@@ -165,7 +168,7 @@ public class Queen : MonoBehaviour
         walking = false;
 
         admire = admireTransform;
-        
+
         if (!admireKilled)
         {
             speechBubble.SetText("What is this?");
@@ -224,7 +227,6 @@ public class Queen : MonoBehaviour
         {
             speechBubble.SetText("");
             yield return new WaitForSeconds(3);
-
         }
         else
         {
@@ -359,7 +361,7 @@ public class Queen : MonoBehaviour
         guardTwo.victim = null;
     }
 
-    IEnumerator UpdatePath()
+    private IEnumerator UpdatePath()
     {
         yield return new WaitForSeconds(Random.value);
         while (true)
@@ -382,7 +384,7 @@ public class Queen : MonoBehaviour
         }
     }
 
-    IEnumerator CalmDown()
+    private IEnumerator CalmDown()
     {
         speechBubble.SetText("");
         yield return new WaitForSeconds(1);
@@ -579,11 +581,11 @@ public class Queen : MonoBehaviour
         speechBubble.SetText("");
     }
 
-    IEnumerator Shout()
+    private IEnumerator Shout()
     {
         if (grounded && !killed && storyteller.guardCount > 0 && victim != null)
         {
-            speechBubble.SetText("What is this?!"); 
+            speechBubble.SetText("What is this?!");
             yield return new WaitForSeconds(3);
         }
         else
@@ -770,7 +772,7 @@ public class Queen : MonoBehaviour
         }
     }
 
-    void OnCollisionStay(Collision collision)
+    private void OnCollisionStay(Collision collision)
     {
         if (collision.gameObject.tag == "Floor")
         {

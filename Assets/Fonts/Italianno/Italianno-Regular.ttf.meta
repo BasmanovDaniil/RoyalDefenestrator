@@ -3,7 +3,7 @@ guid: 3a25870c67862094882a2c66e628be9f
 TrueTypeFontImporter:
   serializedVersion: 2
   fontSize: 128
-  forceTextureCase: 0
+  forceTextureCase: -2
   characterSpacing: 1
   characterPadding: 0
   includeFontData: 1
@@ -12,3 +12,5 @@ TrueTypeFontImporter:
   customCharacters: 
   fontRenderingMode: 0
   userData: 
+  assetBundleName: 
+  assetBundleVariant: 

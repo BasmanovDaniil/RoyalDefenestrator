@@ -2,7 +2,7 @@ using Pathfinding;
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(Seeker))]
+[RequireComponent(typeof (Seeker))]
 public class Guard : MonoBehaviour
 {
     public Transform[] targetList;
@@ -42,14 +42,15 @@ public class Guard : MonoBehaviour
     private string[] panicList;
     private Vector3 newForward;
 
-    void Start()
+    private void Start()
     {
         tr = transform;
         rb = GetComponent<Rigidbody>();
         seeker = GetComponent<Seeker>();
 
         random = new System.Random((int) tr.position.x);
-        panicList = new[] { "Nooo!", "Put me down!", "Help me!", "Aaaaah!", "Whyyyyy?", "Don't throw meeee!", "Please! Nooo!" };
+        panicList = new[]
+        {"Nooo!", "Put me down!", "Help me!", "Aaaaah!", "Whyyyyy?", "Don't throw meeee!", "Please! Nooo!"};
 
         seeker.pathCallback += OnPathComplete;
 
@@ -61,16 +62,17 @@ public class Guard : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         if (!grounded) return;
         newForward = tr.forward;
-        
+
         if (walking)
         {
             if (followQueen)
             {
-                direction = (queen.position + Quaternion.LookRotation(queen.forward, Vector3.up) * behindQueen) - tr.position;
+                direction = (queen.position + Quaternion.LookRotation(queen.forward, Vector3.up)*behindQueen) -
+                            tr.position;
                 direction.y = 0;
                 if (direction.sqrMagnitude > targetDistance*targetDistance)
                 {
@@ -78,12 +80,13 @@ public class Guard : MonoBehaviour
                     {
                         newForward += direction.normalized;
                     }
-                    rb.AddForce(direction.normalized * moveSpeed * Time.deltaTime);
+                    rb.AddForce(direction.normalized*moveSpeed*Time.deltaTime);
                 }
             }
             else if (victim != null && path != null)
             {
-                if ((path.vectorPath[path.vectorPath.Count - 1] - tr.position).sqrMagnitude > targetDistance * targetDistance)
+                if ((path.vectorPath[path.vectorPath.Count - 1] - tr.position).sqrMagnitude >
+                    targetDistance*targetDistance)
                 {
                     direction = path.vectorPath[currentWaypoint] - tr.position;
                     direction.y = 0;
@@ -92,10 +95,10 @@ public class Guard : MonoBehaviour
                     {
                         newForward += direction.normalized;
                     }
-                    rb.AddForce(direction.normalized * moveSpeed * Time.deltaTime);
+                    rb.AddForce(direction.normalized*moveSpeed*Time.deltaTime);
 
                     if ((tr.position - path.vectorPath[currentWaypoint]).sqrMagnitude <
-                        nextWaypointDistance * nextWaypointDistance && currentWaypoint < path.vectorPath.Count - 1)
+                        nextWaypointDistance*nextWaypointDistance && currentWaypoint < path.vectorPath.Count - 1)
                     {
                         currentWaypoint++;
                     }
@@ -128,7 +131,7 @@ public class Guard : MonoBehaviour
                                     window = candidate.transform;
                                 }
                                 else if ((tr.position - candidate.transform.position).sqrMagnitude <
-                                    (tr.position - window.position).sqrMagnitude)
+                                         (tr.position - window.position).sqrMagnitude)
                                 {
                                     window = candidate.transform;
                                 }
@@ -141,7 +144,8 @@ public class Guard : MonoBehaviour
             }
             else if (window != null && path != null)
             {
-                if ((path.vectorPath[path.vectorPath.Count - 1] - tr.position).sqrMagnitude > targetDistance * targetDistance)
+                if ((path.vectorPath[path.vectorPath.Count - 1] - tr.position).sqrMagnitude >
+                    targetDistance*targetDistance)
                 {
                     direction = path.vectorPath[currentWaypoint] - tr.position;
                     direction.y = 0;
@@ -150,9 +154,10 @@ public class Guard : MonoBehaviour
                     {
                         newForward += direction.normalized;
                     }
-                    rb.AddForce(direction.normalized * moveSpeed * Time.deltaTime);
+                    rb.AddForce(direction.normalized*moveSpeed*Time.deltaTime);
 
-                    if ((tr.position - path.vectorPath[currentWaypoint]).sqrMagnitude < nextWaypointDistance * nextWaypointDistance && currentWaypoint < path.vectorPath.Count - 1)
+                    if ((tr.position - path.vectorPath[currentWaypoint]).sqrMagnitude <
+                        nextWaypointDistance*nextWaypointDistance && currentWaypoint < path.vectorPath.Count - 1)
                     {
                         currentWaypoint++;
                     }
@@ -163,7 +168,7 @@ public class Guard : MonoBehaviour
                     direction = Vector3.zero;
                     item.useGravity = true;
                     item.isKinematic = false;
-                    item.AddForce((tr.forward + tr.up + Vector3.ClampMagnitude(rb.velocity, 1)) * throwForce);
+                    item.AddForce((tr.forward + tr.up + Vector3.ClampMagnitude(rb.velocity, 1))*throwForce);
                     walking = false;
                     item = null;
                     window = null;
@@ -176,7 +181,7 @@ public class Guard : MonoBehaviour
             toTarget = target.position - head.position;
             if (Vector3.Angle(head.forward, toTarget) > 3)
             {
-                head.forward = Vector3.Slerp(head.forward, toTarget, 10 * Time.deltaTime);
+                head.forward = Vector3.Slerp(head.forward, toTarget, 10*Time.deltaTime);
             }
             if (Vector3.Angle(tr.forward, toTarget) > 45)
             {
@@ -187,20 +192,21 @@ public class Guard : MonoBehaviour
         {
             if (Vector3.Angle(head.forward, tr.forward) > 3)
             {
-                head.forward = Vector3.Slerp(head.forward, tr.forward, 10 * Time.deltaTime);
+                head.forward = Vector3.Slerp(head.forward, tr.forward, 10*Time.deltaTime);
             }
         }
 
         newForward.y = 0;
         if (newForward != tr.forward || tr.up != Vector3.up)
         {
-            tr.rotation = Quaternion.Slerp(tr.rotation, Quaternion.LookRotation(newForward, Vector3.up), 5 * Time.deltaTime);
+            tr.rotation = Quaternion.Slerp(tr.rotation, Quaternion.LookRotation(newForward, Vector3.up),
+                5*Time.deltaTime);
         }
 
         if (item != null)
         {
-            item.position = tr.position + tr.up * 5 - tr.right;
-            item.rotation = tr.rotation * Quaternion.FromToRotation(Vector3.up, Vector3.right);
+            item.position = tr.position + tr.up*5 - tr.right;
+            item.rotation = tr.rotation*Quaternion.FromToRotation(Vector3.up, Vector3.right);
         }
     }
 
@@ -210,7 +216,7 @@ public class Guard : MonoBehaviour
         yield return new WaitForSeconds(1);
         while (!grounded)
         {
-            random = new System.Random((int)tr.position.x);
+            random = new System.Random((int) tr.position.x);
             speechBubble.SetText(panicList[random.Next(panicList.Length)]);
             yield return new WaitForSeconds(3);
             speechBubble.SetText("");
@@ -218,7 +224,7 @@ public class Guard : MonoBehaviour
         }
     }
 
-    IEnumerator UpdateVictimPath()
+    private IEnumerator UpdateVictimPath()
     {
         yield return new WaitForSeconds(Random.value);
         while (true)
@@ -248,7 +254,7 @@ public class Guard : MonoBehaviour
         SetTarget(targetTransform.position);
     }
 
-    void OnPathComplete(Path p)
+    private void OnPathComplete(Path p)
     {
         if (!p.error)
         {
@@ -261,12 +267,12 @@ public class Guard : MonoBehaviour
         }
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         seeker.pathCallback -= OnPathComplete;
     }
 
-    void OnCollisionStay(Collision collision)
+    private void OnCollisionStay(Collision collision)
     {
         if (collision.gameObject.tag == "Floor")
         {

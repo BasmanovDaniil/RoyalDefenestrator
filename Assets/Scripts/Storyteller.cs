@@ -24,8 +24,7 @@ public class Storyteller : MonoBehaviour
     public Transform firstVictim;
     public GameObject indicatorPrefab;
     public Transform goodAltCat;
-    [HideInInspector]
-    public bool firstVictimDead;
+    [HideInInspector] public bool firstVictimDead;
     public bool catKilled = false;
 
     private bool inMenu;
@@ -34,14 +33,14 @@ public class Storyteller : MonoBehaviour
     private bool firstTime = true;
     private bool end = false;
 
-    void Awake()
+    private void Awake()
     {
         DontDestroyOnLoad(memory);
     }
 
-	void Start ()
-	{
-	    var memories = GameObject.FindGameObjectsWithTag("Respawn");
+    private void Start()
+    {
+        var memories = GameObject.FindGameObjectsWithTag("Respawn");
         if (memories.Length > 1)
         {
             firstTime = false;
@@ -54,9 +53,9 @@ public class Storyteller : MonoBehaviour
             OpenMenu();
         }
         InvokeRepeating("UpdateGraph", 5, 5);
-	}
+    }
 
-    void UpdateGraph()
+    private void UpdateGraph()
     {
         if (AstarPath.active)
         {
@@ -64,7 +63,7 @@ public class Storyteller : MonoBehaviour
         }
     }
 
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown("escape") && !inMenu)
         {
@@ -91,7 +90,7 @@ public class Storyteller : MonoBehaviour
         }
     }
 
-    void StartScenario()
+    private void StartScenario()
     {
         Invoke("OpenDoors", 2);
         Invoke("CallGuards", 4);
@@ -150,7 +149,7 @@ public class Storyteller : MonoBehaviour
         Invoke("OpenMenu", 2);
     }
 
-    IEnumerator StartTutorial()
+    private IEnumerator StartTutorial()
     {
         firstVictim.tag = "FirstVictim";
         yield return new WaitForSeconds(2);
@@ -354,7 +353,7 @@ public class Storyteller : MonoBehaviour
         quit.text = "Quit";
     }
 
-    void CloseMenu()
+    private void CloseMenu()
     {
         followCam.enabled = true;
         menuCam.enabled = false;
@@ -369,13 +368,13 @@ public class Storyteller : MonoBehaviour
         quit.text = "";
     }
 
-    void OpenDoors()
+    private void OpenDoors()
     {
         doors.Open();
         queen.walking = true;
     }
 
-    void CallGuards()
+    private void CallGuards()
     {
         queen.CallGuards();
     }

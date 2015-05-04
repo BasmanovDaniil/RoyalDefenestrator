@@ -6,19 +6,19 @@ public class Shredder : MonoBehaviour
     public Queen queen;
     public Storyteller storyteller;
 
-    IEnumerator DestroyOther(GameObject other)
+    private IEnumerator DestroyOther(GameObject other)
     {
         yield return new WaitForSeconds(1.5f);
         Destroy(other);
     }
 
-    IEnumerator BadEnding()
+    private IEnumerator BadEnding()
     {
         yield return new WaitForSeconds(1);
         storyteller.BadEnding();
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         StartCoroutine(DestroyOther(other.gameObject));
 

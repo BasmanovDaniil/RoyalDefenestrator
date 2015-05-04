@@ -4,13 +4,13 @@ public class Indicator : MonoBehaviour
 {
     private Transform tr;
 
-	void Start ()
-	{
-	    tr = transform;
-	}
-	
-	void Update ()
-	{
-	    tr.up = Vector3.up;
-	}
+    private void Start()
+    {
+        tr = transform;
+    }
+
+    private void Update()
+    {
+        tr.up = Vector3.up;
+    }
 }
