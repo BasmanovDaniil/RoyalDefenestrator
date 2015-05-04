@@ -1,11 +1,8 @@
 # Compiled source #
 ###################
 *.com
-*.class
-*.dll
 *.exe
 *.o
-*.so
 
 # Packages #
 ############
@@ -13,7 +10,6 @@
 *.dmg
 *.gz
 *.iso
-*.jar
 *.rar
 *.tar
 *.zip
@@ -40,10 +36,7 @@ Thumbs.db
 [Ll]ibrary
 [Tt]emp
 [Bb]uilds
-<<<<<<< HEAD
-=======
 *.unityproj
->>>>>>> Песочница со звуком, сферой и поломанными скриптами
 
 # Visual Studio #
 #################
@@ -53,3 +46,5 @@ Thumbs.db
 *.suo
 *.userprefs
 *.pidb
+*.DotSettings
+*.DotSettings.user
