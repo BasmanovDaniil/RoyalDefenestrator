@@ -60,7 +60,7 @@ public class pb_Geometry_Interface : EditorWindow
 		#if !PROTOTYPE
 		Material mat = null;
 		if(EditorPrefs.HasKey(pb_Constant.pbDefaultMaterial))
-			mat = (Material)Resources.LoadAssetAtPath(EditorPrefs.GetString(pb_Constant.pbDefaultMaterial), typeof(Material));
+			mat = (Material)AssetDatabase.LoadAssetAtPath(EditorPrefs.GetString(pb_Constant.pbDefaultMaterial), typeof(Material));
 
 		if(mat != null) pb.SetFaceMaterial(pb.faces, mat);
 		#endif

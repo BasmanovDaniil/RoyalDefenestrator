@@ -239,7 +239,7 @@ public class pb_Preferences
 
 		if(EditorPrefs.HasKey(pb_Constant.pbDefaultMaterial))
 		{
-			_defaultMaterial = (Material) Resources.LoadAssetAtPath(pb_Constant.pbDefaultMaterial, typeof(Material));
+			_defaultMaterial = (Material) AssetDatabase.LoadAssetAtPath(pb_Constant.pbDefaultMaterial, typeof(Material));
 			if(_defaultMaterial == null)
 				_defaultMaterial = pb_Constant.DefaultMaterial;
 		}

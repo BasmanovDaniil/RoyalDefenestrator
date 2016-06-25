@@ -128,7 +128,7 @@ public class pc_AboutWindow : EditorWindow
 		public AdvertisementThumb(string imagePath, string url, string about)
 		{
 			guiContent = new GUIContent("", about);
-			this.image = (Texture2D) Resources.LoadAssetAtPath(imagePath, typeof(Texture2D));
+			this.image = (Texture2D) AssetDatabase.LoadAssetAtPath(imagePath, typeof(Texture2D));
 			guiContent.image = this.image;
 			this.url = url;
 			this.about = about;
@@ -189,7 +189,7 @@ public class pc_AboutWindow : EditorWindow
 
 	public void OnEnable()
 	{
-		banner = (Texture2D)Resources.LoadAssetAtPath(BannerPath, typeof(Texture2D));
+		banner = (Texture2D)AssetDatabase.LoadAssetAtPath(BannerPath, typeof(Texture2D));
 
 		// With Unity 4 (on PC) if you have different values for minSize and maxSize,
 		// they do not apply restrictions to window size.
@@ -364,7 +364,7 @@ public class pc_AboutWindow : EditorWindow
 	void PopulateDataFields(string entryPath)
 	{
 		/* Get data from VersionInfo.txt */
-		TextAsset versionInfo = (TextAsset)Resources.LoadAssetAtPath( entryPath, typeof(TextAsset));
+		TextAsset versionInfo = (TextAsset)AssetDatabase.LoadAssetAtPath( entryPath, typeof(TextAsset));
 		
 		ProductName = "";
 		// ProductIdentifer = "";
@@ -394,7 +394,7 @@ public class pc_AboutWindow : EditorWindow
 		// notes = notes.Trim();
 
 		/* Get first entry in changelog.txt */
-		TextAsset changelogText = (TextAsset)Resources.LoadAssetAtPath( ChangelogPath, typeof(TextAsset));
+		TextAsset changelogText = (TextAsset)AssetDatabase.LoadAssetAtPath( ChangelogPath, typeof(TextAsset));
 
 		if(changelogText)
 		{
@@ -410,7 +410,7 @@ public class pc_AboutWindow : EditorWindow
 
 	private static bool GetField(string path, string field, out string value)
 	{
-		TextAsset entry = (TextAsset)Resources.LoadAssetAtPath(path, typeof(TextAsset));
+		TextAsset entry = (TextAsset)AssetDatabase.LoadAssetAtPath(path, typeof(TextAsset));
 		value = "";
 
 		if(!entry) return false;

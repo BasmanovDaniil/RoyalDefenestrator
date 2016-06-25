@@ -109,7 +109,7 @@ public class pb_Preferences_Internal
 		{
 			case pb_Constant.pbDefaultMaterial:
 				if(EditorPrefs.HasKey(pref))
-					mat = (Material) Resources.LoadAssetAtPath(pref, typeof(Material));
+					mat = (Material) AssetDatabase.LoadAssetAtPath(pref, typeof(Material));
 				break;
 
 			default:
